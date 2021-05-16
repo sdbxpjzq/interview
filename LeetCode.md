@@ -419,7 +419,7 @@ public int uniquePaths(int m, int n) {
     return dp[m-1][n-1];
 }
 ```
-## _63_不同路径II_中等
+## -63-不同路径II_中等
 
 有障碍物
 
@@ -469,7 +469,7 @@ public int uniquePathsWithObstacles(int[][] obstacleGrid) {
 }
 ```
 
-## _322_零钱兑换_中等
+## -322-零钱兑换_中等
 
 ```java
 给定不同面额的硬币 coins 和一个总金额 amount
@@ -532,7 +532,7 @@ public boolean isSubsequence(String s, String t) {
     return false;
 }
 ```
-## _53_最大子序和_简单
+## -53-最大子序和_简单
 
 ```java
 给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
@@ -559,7 +559,7 @@ public int maxSubArray(int[] nums) {
 }
 ```
 
-## _300_最长递增子序列(返回长度)_中等
+## -300-最长递增子序列(返回长度)_中等
 
 ```java
 输入：nums = [10,9,2,5,3,7,101,18]
@@ -588,7 +588,7 @@ public int lengthOfLIS(int[] nums) {
     return result;
 }
 ```
-## _674_最长连续递增子序列_简单
+## -674-最长连续递增子序列_简单
 
 ```java
 输入：nums = [1,3,5,4,7]
@@ -621,7 +621,7 @@ public int findLengthOfLCIS(int[] nums) {
 
 [https://mp.weixin.qq.com/s/169FdlShVT1_GhLWA8eJlA](https://mp.weixin.qq.com/s/169FdlShVT1_GhLWA8eJlA?fileGuid=p3cxcwXqc6QVkk6k)
 
-## _121_买卖股票的最佳时机_简单
+## -121-买卖股票的最佳时机_简单
 
 只允许买卖一次
 
@@ -650,7 +650,7 @@ public static int maxProfit(int[] prices) {
 }
 ```
 
-## _122_买卖股票的最佳时机II_简单
+## -122-买卖股票的最佳时机II_简单
 
 ```java
 多次买卖
@@ -674,7 +674,7 @@ public static int maxProfit(int[] prices) {
     return Math.max(dp[prices.length - 1][0], dp[prices.length - 1][1]);
 }
 ```
-## _309_最佳买卖股票时机含冷冻期_中等
+## -309-最佳买卖股票时机含冷冻期_中等
 
 ```java
 输入: [1,2,3,0,2]
@@ -696,14 +696,14 @@ public int maxProfit(int[] prices) {
   return Math.max(dp[prices.length - 1][0], dp[prices.length - 1][1]);
 }
 ```
-## _123_买卖股票的最佳时机III_困难- 过
+## -123-买卖股票的最佳时机III_困难- 过
 
 只能交易2次
 
 [https://www.bilibili.com/video/BV1ED4y1Q7AP](https://www.bilibili.com/video/BV1ED4y1Q7AP?fileGuid=p3cxcwXqc6QVkk6k)
 
 
-## _200_岛屿数量_中等
+## -200-岛屿数量_中等
 
 给你一个由`'1'`（陆地）和`'0'`（水）组成的的二维网格，请你计算网格中岛屿的数量。
 
@@ -777,7 +777,7 @@ dummyNode.next = head
 ListNode currentNode = dummyNode;
 
 
-## (NC4)_141_判断环形链表_简单
+## (NC4)-141-判断环形链表_简单
 
 HashSet 和 快慢指针
 
@@ -845,7 +845,7 @@ public static int kthToLast(ListNode head, int k) {
     return slow.val;
 }
 ```
-## _19_删除链表的倒数第 N 个结点_中等
+## -19-删除链表的倒数第 N 个结点_中等
 
 ```java
 public ListNode removeNthFromEnd(ListNode head, int n) {
@@ -867,7 +867,7 @@ public ListNode removeNthFromEnd(ListNode head, int n) {
 }
 ```
 
-## _876_链表的中间结点_简单
+## -876-链表的中间结点_简单
 
 求链表的中间节点，如果链表节点数为奇数，返回中间节点；如果链表节点数为偶数，返回中间两个节点的任意一个。
 
@@ -882,7 +882,7 @@ public ListNode middleNode(ListNode head) {
     return slow;
 }
 ```
-## _142_环形链表II_中等_链表中环的入口节点
+## -142-环形链表II_中等_链表中环的入口节点
 
 ```plain
 第一步是确定该链表有没有环, 否存在环，若有找到一快一慢的两个指针相遇的节点
@@ -905,7 +905,7 @@ public ListNode detectCycle(ListNode head){
     }
 ```
 
-## (NC78)_206_反转链表_简单 - 双指针
+## (NC78)-206-反转链表_简单 - 双指针
 
 ```plain
 * 输入: 1->2->3->4->5->NULL
@@ -926,7 +926,7 @@ public static ListNode reverseListV2(ListNode head) {
 }
 ```
 
-## (NC21)_92_反转链表II_中等(局部翻转, 重点)
+## (NC21)-92-反转链表II_中等(局部翻转, 重点)
 
 ```plain
 反转从位置 m 到 n 的链表。请使用一趟扫描完成反转
@@ -963,33 +963,7 @@ public ListNode reverseBetween(ListNode head, int m, int n) {
     return dummyNode.next;
 }
 ```
-## _24_两两交换链表中的节点_中等
-
-```java
-[1,2,3,4,5]
-[2,1,4,3,5]
-/**
- * 递归实现方式
- *
- * 从链表的头节点 head 开始递归。
- * 每次递归都负责交换一对节点。由 firstNode 和 secondNode表示要交换的两个节点。
- * 下一次递归则是传递的是下一对需要交换的节点。若链表中还有节点，则继续递归。
- * 交换了两个节点以后，返回 secondNode，因为它是交换后的新头。
- * 在所有节点交换完成以后，我们返回交换后的头，实际上是原始链表的第二个节点。
- */
-public ListNode swapPairs(ListNode head) {
-    if ((head == null) || (head.next == null)) {
-        return head;
-    }
-    ListNode firstNode = head;
-    ListNode secondNode = head.next;
-    firstNode.next  = swapPairs(secondNode.next);
-    secondNode.next = firstNode;
-    return secondNode;
-}
-
-```
-## _25_ K 个一组翻转链表_困难
+## -25- K 个一组翻转链表_困难
 
 ```java
 输入：head = [1,2,3,4,5], k = 3
@@ -1021,7 +995,34 @@ private ListNode reverse206(ListNode head, ListNode tail) {
     return newHead;
 }
 ```
-## _21_合并两个有序链表_简单
+## -24-两两交换链表中的节点_中等
+
+```java
+[1,2,3,4,5]
+[2,1,4,3,5]
+/**
+ * 递归实现方式
+ *
+ * 从链表的头节点 head 开始递归。
+ * 每次递归都负责交换一对节点。由 firstNode 和 secondNode表示要交换的两个节点。
+ * 下一次递归则是传递的是下一对需要交换的节点。若链表中还有节点，则继续递归。
+ * 交换了两个节点以后，返回 secondNode，因为它是交换后的新头。
+ * 在所有节点交换完成以后，我们返回交换后的头，实际上是原始链表的第二个节点。
+ */
+public ListNode swapPairs(ListNode head) {
+    if ((head == null) || (head.next == null)) {
+        return head;
+    }
+    ListNode firstNode = head;
+    ListNode secondNode = head.next;
+    firstNode.next  = swapPairs(secondNode.next);
+    secondNode.next = firstNode;
+    return secondNode;
+}
+
+```
+
+## -21-合并两个有序链表_简单
 
 ```java
 public ListNode mergeTwoLists(ListNode linked1, ListNode linked2) {
@@ -1053,7 +1054,7 @@ public ListNode mergeTwoLists(ListNode linked1, ListNode linked2) {
     return dummy.next;
 }
 ```
-## _369_单链表加1_中等
+## -369-单链表加1_中等
 
 ```java
 输入: [1,2,3]
@@ -1087,7 +1088,7 @@ public ListNode plusOne(ListNode head) {
     }
 }
 ```
-## _2_链表相加_中等
+## -2-链表相加_中等
 
 ![图片](https://uploader.shimo.im/f/VDDLq1VNCzazWjFN.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k)
 
@@ -1139,7 +1140,7 @@ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
         return dummyNode.next;
     }
 ```
-## _445_链表相加II_中等
+## -445-链表相加II_中等
 
 非逆序
 
@@ -1174,6 +1175,49 @@ public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
     }
     return newHead;
 }
+```
+
+## -160-相交链表_简单
+
+![](https://youpaiyun.zongqilive.cn/image/20210516093202.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+## -24-两两交换链表中的节点_中等
+
+```java
+[1,2,3,4,5]
+[2,1,4,3,5]
+/**
+ * 递归实现方式
+ *
+ * 从链表的头节点 head 开始递归。
+ * 每次递归都负责交换一对节点。由 firstNode 和 secondNode表示要交换的两个节点。
+ * 下一次递归则是传递的是下一对需要交换的节点。若链表中还有节点，则继续递归。
+ * 交换了两个节点以后，返回 secondNode，因为它是交换后的新头。
+ * 在所有节点交换完成以后，我们返回交换后的头，实际上是原始链表的第二个节点。
+ */
+public ListNode swapPairs(ListNode head) {
+    if ((head == null) || (head.next == null)) {
+        return head;
+    }
+    ListNode firstNode = head;
+    ListNode secondNode = head.next;
+    firstNode.next  = swapPairs(secondNode.next);
+    secondNode.next = firstNode;
+    return secondNode;
+}
+
 ```
 
 # 二叉树相关
@@ -1407,7 +1451,7 @@ public List<List<Integer>> zigzagLevelOrder2(TreeNode root) {
 ```
 
 
-## _110_验证平衡二叉树_简单
+## -110-验证平衡二叉树_简单
 
 ```java
 // 一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 。
@@ -1428,7 +1472,7 @@ private int depth(TreeNode root) {
     return Math.max(depth(root.left), depth(root.right)) + 1;
 }
 ```
-## _98_验证二叉搜索树_中等
+## -98-验证二叉搜索树_中等
 
 ```java
 // 利用 中序遍历 有序
@@ -1455,7 +1499,7 @@ public boolean isValidBST(TreeNode root) {
     return true;
 }
 ```
-## _101_对称二叉树_简单
+## -101-对称二叉树_简单
 
 例如，二叉树 [1,2,2,3,4,4,3] 是对称的。
 
@@ -1488,32 +1532,7 @@ public boolean check(TreeNode a, TreeNode b) {
     }    
 }
 ```
-## _226_翻转二叉树_简单
-
-输入：
-
-4
-
-/   \
-
-2     7
-
-/ \   / \
-
-1   3 6   9
-
-输出：
-
-4
-
-/   \
-
-7     2
-
-/ \   / \
-
-9   6 3   1
-
+## -226-翻转二叉树_简单
 根节点的左右子节点 互换
 
 ```java
@@ -1529,7 +1548,7 @@ public TreeNode invertTree(TreeNode root) {
     return root;
 }
 ```
-## _235_二叉搜索树的最近公共祖先_简单
+## -235-二叉搜索树的最近公共祖先_简单
 
 ![](https://youpaiyun.zongqilive.cn/image/20210514100048.png)
 
@@ -1538,8 +1557,6 @@ public TreeNode invertTree(TreeNode root) {
 输出: 6
 
 解释: 节点 2 和节点 8 的最近公共祖先是 6。
-
-
 
 ```java
 public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
@@ -1557,7 +1574,7 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
         return root;
 }
 ```
-## _236_二叉树的最近公共祖先_中等
+## -236-二叉树的最近公共祖先_中等
 
 ![](https://youpaiyun.zongqilive.cn/image/20210514100117.png)
 
@@ -1588,7 +1605,7 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
 
 
 
-## _230_二叉搜索树中第K小的元素_中等 或者 第K大元素
+## -230-二叉搜索树中第K小的元素_中等 或者 第K大元素
 
 第K小: 中序遍历 数组升序递增,  第k个元素就是
 
@@ -1644,7 +1661,7 @@ public int kthLargest(TreeNode root, int k) {
     }
 ```
 
-## _257_二叉树的所有路径_简单
+## -257-二叉树的所有路径_简单
 
 输入:
 
@@ -1683,7 +1700,7 @@ public void dfs(TreeNode root) {
 }
 ```
 
-## _112_路径总和_简单
+## -112-路径总和_简单
 
 判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
 
@@ -1718,7 +1735,7 @@ public boolean hasPathSum(TreeNode root, int sum) {
     return hasPathSum(root.left, sum) || hasPathSum(root.right, sum); 
 }
 ```
-## _113_路径总和II中等
+## -113-路径总和II中等
 
 找到所有从根节点到叶子节点路径总和等于给定目标和的路径
 
@@ -1749,7 +1766,7 @@ public void help(TreeNode root, int sum) {
 }
 ```
 
-## _437_路径总和III_中等
+## -437-路径总和III_中等
 
 ```java
 找出路径和等于给定数值的路径总数。
@@ -1777,7 +1794,7 @@ public void Sum(TreeNode root, int sum){
     Sum(root.right,sum);
 }
 ```
-## _104_二叉树的最大深度_简单 或 最小深度
+## -104-二叉树的最大深度_简单 或 最小深度
 
 ```java
 // 最大深度
@@ -1811,7 +1828,7 @@ public int minDepth(TreeNode root) {
     return 1+ Math.min(leftHeight, rightHeight);
 }
 ```
-## _617_合并二叉树_简单
+## -617-合并二叉树_简单
 
 ```java
 给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。
@@ -1832,7 +1849,7 @@ public TreeNode mergeTrees(TreeNode t1, TreeNode t2) {
         return result;
     }
 ```
-## _114_二叉树展开为链表_中等
+## -114-二叉树展开为链表_中等
 
 ![图片](https://uploader.shimo.im/f/6tMR8ut1e8Xcg3Cs.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k)
 
@@ -1896,7 +1913,7 @@ def backtrack(路径, 选择列表):
         撤销选择
 其核心就是 for 循环里面的递归，在递归调用之前「做选择」，在递归调用之后「撤销选择」
 ```
-## _46_全排列_简单
+## -46-全排列_简单
 
 没有重复的数
 
@@ -1938,7 +1955,7 @@ private void m(int[] nums, List<Integer> path,  boolean[] visited) {
     }
 }
 ```
-## _47_全排列II_中等
+## -47-全排列II_中等
 
 包含重复数字
 
@@ -1973,7 +1990,7 @@ public void helper(int[] nums, List<Integer> path, boolean[] visited) {
     }
 }
 ```
-## _78_子集_中等-dfs+回溯
+## -78-子集_中等-dfs+回溯
 
 不重复的数组
 
@@ -1996,7 +2013,7 @@ public void helper(int[] arr,List<Integer> path, int start) {
     }
 }
 ```
-## _90_子集II_中等
+## -90-子集II_中等
 
 数组存在重复
 
@@ -2026,7 +2043,7 @@ public void helper(int[] arr, List<Integer> path, int start) {
 }
 ```
 
-## _39_组合求和_中等
+## -39-组合求和_中等
 
 原数组无重复元素, 元素可以使用多次
 
@@ -2060,7 +2077,7 @@ private void help(int[] arr, List<Integer> path, int target,int start) 
     }
 ```
 
-## _40_组合求和II_中等
+## -40-组合求和II_中等
 
 原数组有重复元素, 元素可以使用1次
 
@@ -2104,10 +2121,23 @@ private void help(int[] arr,  int target, List<Integer> path, int start) {
 
 
 
-
 # 数组
 
-## _215_数组中的第K个最大(小)元素_中等
+## -4-寻找两个正序数组的中位数_困难
+
+```
+给定两个大小分别为 m 和 n 的正序（从小到大）数组 nums1 和 nums2。请你找出并返回这两个正序数组的 中位数 。
+
+输入：nums1 = [1,3], nums2 = [2]
+输出：2.00000
+解释：合并数组 = [1,2,3] ，中位数 2
+```
+
+
+
+
+
+## -215-数组中的第K个最大(小)元素_中等
 
 ```java
 ## 思路1: 
@@ -2154,7 +2184,7 @@ private int partition(int[] a, int left, int right) {
     return left;
 } 
 ```
-## _88_合并两个有序数组_简单
+## -88-合并两个有序数组_简单
 
 初始化 nums1 和 nums2 的元素数量分别为 m 和 n 。
 
@@ -2188,7 +2218,7 @@ public void merge(int[] nums1, int m, int[] nums2, int n) {
     }
 }
 ```
-## _283_移动零_简单
+## -283-移动零_简单
 
 ```java
 public static void moveZeroes(int[] nums) {
@@ -2209,7 +2239,7 @@ public static void moveZeroes(int[] nums) {
     }
 }
 ```
-## _26_删除有序数组中的重复项_简单
+## -26-删除有序数组中的重复项_简单
 
 ```java
 给定数组 nums = [1,1,2], 
@@ -2230,7 +2260,7 @@ public int removeDuplicates(int[] nums) {
 }
 ```
 
-## _27_移除数组中指定重复元素_简单
+## -27-移除数组中指定重复元素_简单
 
 ```java
 输入：nums = [3,2,2,3], val = 3
@@ -2251,7 +2281,7 @@ public int removeElement(int[] nums, int val) {
     return slow;
 }
 ```
-## _287_寻找数组中重复数_中等
+## -287-寻找数组中重复数_中等
 
 ```java
 nums 只有 一个重复的整数 ，找出 这个重复的数 。
@@ -2278,7 +2308,7 @@ public int findDuplicate(int[] nums) {
 }
 ```
 
-## _347_数组中前K个高频元素_中等
+## -347-数组中前K个高频元素_中等
 
 ```java
 输入: nums = [1,1,1,2,2,3], k = 2
@@ -2300,7 +2330,7 @@ public int[] topKFrequent(int[] nums, int k) {
 ```
 _最最小的K个数
 
-## _189_旋转数组_简单
+## -189-旋转数组_简单
 
 ```java
 /**
@@ -2346,7 +2376,7 @@ private void reverse(int[] nums, int start, int end) {
 
 左右指针滑窗口, 一前一后齐头进
 
-## _3_无重复字符的最长子串_中等
+## -3-无重复字符的最长子串_中等
 
 ```plain
 输入: "abcabcbb"
@@ -2379,7 +2409,7 @@ _205_同构字符串_简单
 _6_Z字形变换_中等(看不懂没做,[https://www.bilibili.com/video/BV1Cv411z7hX)](https://www.bilibili.com/video/BV1Cv411z7hX)?fileGuid=p3cxcwXqc6QVkk6k)
 
 
-## _14_最长公共前缀_简单
+## -14-最长公共前缀_简单
 
 ```plain
 输入：strs = ["flower","flow","flight"]
@@ -2400,7 +2430,7 @@ public String longestCommonPrefix(String[] strs) {
 }
 ```
 
-## _387_字符串中的第一个唯一字符
+## -387-字符串中的第一个唯一字符_简单
 
 ```plain
 给定一个字符串，找到它的第一个不重复的字符，并返回它的索引。如果不存在，则返回 -1。
@@ -2409,7 +2439,20 @@ s = "leetcode"
 s = "loveleetcode"
 返回 2
 ```
-```plain
+```java
+public int firstUniqChar(String s) {
+  HashMap<Character, Integer> map = new HashMap<>();
+  char[] chars = s.toCharArray();
+  for (int i = 0; i < chars.length; i++) {
+    map.put(chars[i], map.getOrDefault(chars[i], 0) + 1);
+  }
+  for (int i = 0; i < chars.length; i++) {
+    if (map.get(chars[i]) == 1) {
+      return i;
+    }
+  }
+  return -1;
+}
 
 ```
 
@@ -2417,7 +2460,7 @@ _125_验证回文串_简单
 
 _680_验证回文字符串Ⅱ_简单
 
-## _5_最长回文子串_中等 --中心扩散法
+## -5-最长回文子串_中等 --中心扩散法
 
 
 
@@ -2425,7 +2468,7 @@ _680_验证回文字符串Ⅱ_简单
 
 # 贪心算法
 
-## _55_跳跃游戏_中等
+## -55-跳跃游戏_中等
 
 ```java
 输入：nums = [2,3,1,1,4]
@@ -2443,7 +2486,7 @@ public boolean canJump(int[] nums) {
     return max_i >= nums.length - 1;
 }
 ```
-## _45_跳跃游戏II_困难-过
+## -45-跳跃游戏II_困难-过
 
 
 
@@ -2453,7 +2496,7 @@ public boolean canJump(int[] nums) {
 
 # 数学
 
-## _136_只出现一次的数字_简单
+## -136-只出现一次的数字_简单
 
 ```java
 异或 规律
@@ -2476,7 +2519,7 @@ public int singleNumber(int[] nums) {
     return result;
 }
 ```
-## _260_只出现一次的数字 III_中等
+## -260-只出现一次的数字 III_中等
 
 ```java
 给定一个整数数组 nums，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。
@@ -2504,7 +2547,7 @@ public int[] singleNumber(int[] nums) {
     return res;
 }
 ```
-## _137_只出现一次的数字II_中等
+## -137-只出现一次的数字II_中等
 
 ```java
 一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现了三次。找出那个只出现了一次的元素
@@ -2536,7 +2579,7 @@ public int singleNumber(int[] arr) {
 ```
 
 
-## _633_平方数之和_中等
+## -633-平方数之和_中等
 
 ```java
 给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。
@@ -2657,7 +2700,7 @@ private static String jisuan(String str1, String str2) {
     return str.toString();
 }
 ```
-## _1_两数之和 简单
+## -1-两数之和 简单
 
 ```java
 给定 nums = [2, 7, 11, 15], target = 9
@@ -2679,7 +2722,7 @@ public int[] twoSum(int[] nums, int target) {
     throw new IllegalArgumentException("No two sum solution");
 }
 ```
-## _15_三数之和_中等
+## -15-三数之和_中等
 
 ```java
 给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
@@ -2695,7 +2738,7 @@ public int[] twoSum(int[] nums, int target) {
 
 # 设计
 
-## _146_LRU缓存机制_中等--双向链表
+## -146-LRU缓存机制_中等--双向链表
 
 ```java
 public class LRUCache {
@@ -2790,7 +2833,7 @@ public class LRUCache {
 
 # 其他
 
-## _20_有效的括号_简单
+## -20-有效的括号_简单
 
 ```java
 public static boolean isValid(String s) {
@@ -2953,20 +2996,4 @@ Top k 的问题
 分而治之/hash映射 + hash统计 + 堆/快速/归并排序；
 ```
 ![](https://youpaiyun.zongqilive.cn/image/20210514100338.png)
-
-
-
-# 资料
-
-## 必背
-
-https://space.bilibili.com/16287667/channel/detail?cid=123118&ctype=0
-
-书森学院
-
-
-
-[https://mp.weixin.qq.com/s/ZSqUEpUEEYCYXa8FLOj9Fg](https://mp.weixin.qq.com/s/ZSqUEpUEEYCYXa8FLOj9Fg?fileGuid=p3cxcwXqc6QVkk6k)
-
-
 
