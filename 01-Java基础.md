@@ -1,3 +1,31 @@
+https://www.bilibili.com/video/BV1wf4y1W7Hj
+
+https://www.bilibili.com/video/BV17K4y1K7CX/
+
+
+
+# JVM
+
+
+
+
+
+
+
+
+
+## 对象创建的6个步骤
+
+1. 类是否加载
+2. 为对象分配内存
+3. 初始化默认值
+4. 设置对象头
+5. 执行init方法,进行初始化
+6. 建立变量的引用关系
+7. 
+
+
+
 # 线程池
 
 ## 构造参数
@@ -13,8 +41,6 @@ ThreadPoolExecutor参数最全的构造方法：
 - **workQueue：**一个阻塞队列，提交的任务将会被放到这个队列里。
 - **threadFactory：**线程工厂，用来创建线程，主要是为了给线程起名字，默认工厂的线程名字：pool-1-thread-3。
 - **handler：**拒绝策略，当线程池里线程被耗尽，且队列也满了的时候会调用。
-
-
 
 
 

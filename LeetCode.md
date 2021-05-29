@@ -1,28 +1,22 @@
-# 数据结构
-## 跳表
-
-时间复杂度平均能达到O(log n)
-
-### 跳表时间复杂度计算
-
-时间复杂度 = 索引的高度 * 每层索引遍历元素的个数。
-
-假设 每一层索引的结点数量都是低层索引的一半。
-
-原始链表有n个结点，那么索引的层级就是log(n)-1，, 跳表的总高度是 logn-1 +1= logn,  在每一层的访问次数是常量(K)，因此查找结点的平均时间复杂度是O（K * logn）,省略常数O(logn)
-
-
 ## 堆
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095225.png)
+大顶堆：每个结点的值都大于或等于其左右孩子结点的值。
 
+ 小顶堆：每个结点的值都小于或等于其左右孩子结点的值
+
+只能从堆顶取值
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095225.png#id=uMCGm&originHeight=275&originWidth=825&originalType=binary&status=done&style=none)
 
 
 # 设计模式-单例(java)
 
+
 双重检查
 
-```plain
+
+```
 public class Singleton {
     //指向实例的私有静态引用
     private volatile static Singleton singleton;
@@ -42,9 +36,12 @@ public class Singleton {
     }
 }
 ```
+
+
 懒汉式
 
-```plain
+
+```
 public class Singleton4 {
 private Singleton4 (){
   
@@ -59,11 +56,14 @@ private Singleton4 (){
 }
 ```
 
+
 # 排序
+
 
 ## 冒泡排序
 
-```plain
+
+```
 /**
  * 推荐这个
  * flag 用来做优化
@@ -98,9 +98,13 @@ private static void maoPao(int[] nums) {
     System.out.println("比较次数: " + count);
 }
 ```
+
+
 ## 快排
 
-平均时间复杂度**O(nlogn)**,  最坏的情况**O(n^2), 不稳定排序**
+
+平均时间复杂度**O(nlogn)**,  最坏的情况**O(n^2), 不稳定排序**
+
 
 ```java
 // 非递归写法
@@ -165,9 +169,13 @@ private static void quickSortV3(int[] arr, int left, int right) {
     a[right] = t;
   }
 ```
+
+
 ## 面试题排序
 
+
 给定0，1，2组成的数组，把0，1，2按顺序排列，空间复杂度O(1),时间复杂度O(n)
+
 
 ```
 public static int[] sort(int[] data) {
@@ -191,11 +199,16 @@ public static int[] sort(int[] data) {
     return data;
 }
 ```
+
+
 ## 堆排序
+
 
 O(nlogk)
 
+
 ## 归并排序
+
 
 ```java
 // 归并排序
@@ -252,13 +265,17 @@ private static void merge(int[] arr, int start, int mid, int end) {
     }
 }
 ```
+
+
 # 查找算法
 
-## 二分查找 - 前提是 有序的数组
+## 二分查找 - 无重复数字
 
-O(logn)
+前提是 有序的数组, 时间复杂度 - O(logn)
+
 
 ```java
+
 /**
  * 非递归 推荐这个
  */
@@ -302,26 +319,61 @@ public static int binarySearch(int[] arr, int start, int end, int target) {
     }
 }
 ```
+## 二分查找II_ 有重复数字
+
+```java
+public int search(int[] array, int target) {
+    int start = 0;
+    int end = array.length - 1;
+    while (start <= end) {
+        int mid = start + (end - start) / 2;
+        if (array[mid] == target) {
+            //判断mid之前是否有相同元素（即是否是第一个target）
+            //mid!=0，注意是!=，这是输出结果的边界条件
+            while (mid != 0 && (array[mid - 1] == array[mid])) {
+                --mid;
+            }
+            return mid;
+        } else if (array[mid] < target) {
+            start = mid + 1;
+        } else {
+            end = mid - 1;
+        }
+    }
+    return -1;
+}
+```
+
 
 
 # 动态规划
 
-```plain
+
+```
 动态规划的套路
 1. 状态容器
 2. 初始化
 3. 动态方程
 4. 最后结果
+https://www.zdaiot.com/DataStructureAlgorithm/40%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92%E7%90%86%E8%AE%BA%EF%BC%9A%E4%B8%80%E7%AF%87%E6%96%87%E7%AB%A0%E5%B8%A6%E4%BD%A0%E5%BD%BB%E5%BA%95%E6%90%9E%E6%87%82%E6%9C%80%E4%BC%98%E5%AD%90%E7%BB%93%E6%9E%84%E3%80%81%E6%97%A0%E5%90%8E%E6%95%88%E6%80%A7%E5%92%8C%E9%87%8D%E5%A4%8D%E5%AD%90%E9%97%AE%E9%A2%98/
 ```
+
+
 ## -70-爬楼梯_简单
 
->**需要 n 阶你才能到达楼顶。每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？**
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095324.png)
+> **需要 n 阶你才能到达楼顶。每次你可以爬 1 或 2 个台阶。你有多少种不同的方法可以爬到楼顶呢？**
+
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095324.png#id=fDero&originHeight=247&originWidth=328&originalType=binary&status=done&style=none)
+
 
 上第一个台阶: 1种方法
 
+
 上第二个台阶: 2种方法
+
 
 ```java
 public class Solution_1 {
@@ -347,56 +399,159 @@ public class Solution_1 {
 
 ## -198-打家劫舍_简单
 
->计划偷窃沿街的房屋。每间房内都藏有一定的现金, 不能偷取相邻的房间,能够偷窃到的最高金额
->* 输入：[2,7,9,3,1]
->* 输出：12
->* 解释：偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。
->*      偷窃到的最高金额 = 2 + 9 + 1 = 12 。
-
-![](https://youpaiyun.zongqilive.cn/image/20210514095502.png)
 
 ```java
+房子是一排
+每间房内都藏有一定的现金, 不能偷取相邻的房间,求能够偷窃到的最高金额
+- 输入：[2,7,9,3,1]
+- 输出：12
+- 解释：偷窃 1 号房屋 (金额 = 2), 偷窃 3 号房屋 (金额 = 9)，接着偷窃 5 号房屋 (金额 = 1)。
+- 偷窃到的最高金额 = 2 + 9 + 1 = 12 。
+
 public int rob(int[] nums) {
-    int n = nums.length;
-    if (n==0) {
+    if (nums == null || nums.length == 0) {
         return 0;
     }
+    int len = nums.length;
+    //dp[房子的位置][选择]
     // 状态容器
-    int[] R = new int[n]; // 偸
-    int[] NR  = new int[n]; // 不偷
+    int[][] dp = new int[len][2];
     // 初始化
-    R[0] = nums[0];
-    NR[0] = 0; // 不偷 没钱
+    dp[0][0] = 0; // 不抢
+    dp[0][1] = nums[0]; // 抢
     // 状态方程
-    for (int i = 1; i < n; i++) {
-        R[i] = nums[i]+NR[i-1];
-        NR[i] = Math.max(R[i-1], NR[i-1]);
+    for (int i = 1; i < len; i++) {
+        dp[i][0] = Math.max(dp[i - 1][0], dp[i - 1][1]);
+        dp[i][1] = Math.max(dp[i - 1][1], dp[i - 1][0] + nums[i]);
     }
-    return Math.max(R[n-1], NR[n-1]);
+    return Math.max(dp[len - 1][0], dp[len - 1][1]);
 }
 ```
 
-## -213-打家劫舍II_中等 --不明白
 
-213和198 的区别是 : 213 是一个围城圈的房子
+## -213-打家劫舍II_中等
+
+```java
+房子不是一排，而是围成了一个圆圈
+输入：nums = [1,2,3,1]
+输出：4
+解释：你可以先偷窃 1 号房屋（金额 = 1），然后偷窃 3 号房屋（金额 = 3）。
+     偷窃到的最高金额 = 1 + 3 = 4 。
+有三种不同情况：
+  1-要么都不被抢；(不需要考虑)
+  2-要么第一间房子被抢最后一间不抢；
+  3-要么最后一间房子被抢第一间不抢
+public int rob(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    int len = nums.length;
+    if (len == 1) return nums[0];
+    if (len== 2) return Math.max(nums[0], nums[1]);
+    return Math.max(help(nums, 0, len - 2), help(nums, 1, len - 1));
+}
+
+private int help(int[] nums, int left, int right) {
+  // 状态容器
+    int[][] dp = new int[right - left + 1][2];
+  // 初始化
+    dp[0][0] = 0; // 不抢
+    dp[0][1] = nums[left]; // 抢
+  // 状态方程
+    for (int i = left + 1; i <= right; i++) {
+        int index = i - left; // 注意下标的处理方式
+        dp[index][0] = Math.max(dp[index - 1][0], dp[index - 1][1]);
+        dp[index][1] = Math.max(dp[index - 1][1], dp[index - 1][0] + nums[i]);
+    }
+
+    return Math.max(dp[right - left][0], dp[right - left][1]);
+}
+```
+
+## -337-打家劫舍III_中等
+
+```java
+房子是一棵二叉树
+如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。
+输入: [3,2,3,null,3,null,1]
+     3
+    / \
+   2   3
+    \   \ 
+     3   1
+输出: 7 
+解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.
+// 方法二 动态规划
+public int rob(TreeNode root) {
+    int[] res = dp(root);
+    return Math.max(res[0], res[1]);
+}
+
+/* 返回一个大小为 2 的数组 arr
+arr[0] 表示不抢 root 的话，得到的最大钱数
+arr[1] 表示抢 root 的话，得到的最大钱数 */
+public int[] dp(TreeNode root) {
+    if (root == null) {
+        return new int[]{0, 0};
+    }
+    int[] left = dp(root.left);
+    int[] right = dp(root.right);
+    // 抢，下家就不能抢了
+    int rob = root.val + left[0] + right[0];
+    // 不抢，下家可抢可不抢，取决于收益大小
+    int not_rob = Math.max(left[0], left[1]) + Math.max(right[0], right[1]);
+    return new int[]{not_rob, rob};
+}  
+
+// 方法一 自上往下走
+Map<TreeNode, Integer> memo = new HashMap<>();
+public int rob(TreeNode root) {
+    if (root == null) {
+        return 0;
+    }
+    // 利用备忘录消除重叠子问题
+    if (memo.containsKey(root)) {
+        return memo.get(root);
+    }
+    // 抢，然后去下下家
+    int do_it = root.val;
+    if (root.left != null) {
+        do_it+=rob(root.left.left) + rob(root.left.right);
+    }
+    if (root.right != null) {
+        do_it+= rob(root.right.left) + rob(root.right.right);
+    }
+    // 不抢，然后去下家
+    int not_do = rob(root.left) + rob(root.right);
+
+    int res = Math.max(do_it, not_do);
+    memo.put(root, res);
+    return res;
+}
+```
+
 
 
 
 ## -343-整数拆分_中等
 
->给定一个正整数 n，将其拆分为至少两个正整数的和，并使这些整数的乘积最大化。 返回你可以获得的最大乘积。
->输入: 10
->输出: 36
->解释: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36。
+
+> 给定一个正整数 n，将其拆分为至少两个正整数的和，并使这些整数的乘积最大化。 返回你可以获得的最大乘积。
+输入: 10
+输出: 36
+解释: 10 = 3 + 3 + 4, 3 × 3 × 4 = 36。
+
 
 
 ## -62-不同路径_中等
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095610.png)
 
->机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角, 问总共有多少条不同的路径
+![](https://youpaiyun.zongqilive.cn/image/20210514095610.png#id=URawo&originHeight=183&originWidth=400&originalType=binary&status=done&style=none)
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095620.png)
+
+> 机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角, 问总共有多少条不同的路径
+
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095620.png#id=brqSP&originHeight=428&originWidth=419&originalType=binary&status=done&style=none)
 
 
 ```java
@@ -419,11 +574,15 @@ public int uniquePaths(int m, int n) {
     return dp[m-1][n-1];
 }
 ```
+
+
 ## -63-不同路径II_中等
+
 
 有障碍物
 
-```plain
+
+```
 输入：obstacleGrid = [[0,0,0],[0,1,0],[0,0,0]]
 输出：2
 解释：
@@ -432,6 +591,8 @@ public int uniquePaths(int m, int n) {
 1. 向右 -> 向右 -> 向下 -> 向下
 2. 向下 -> 向下 -> 向右 -> 向右
 ```
+
+
 ```java
 public int uniquePathsWithObstacles(int[][] obstacleGrid) {
     // 状态容器
@@ -469,7 +630,9 @@ public int uniquePathsWithObstacles(int[][] obstacleGrid) {
 }
 ```
 
+
 ## -322-零钱兑换_中等
+
 
 ```java
 给定不同面额的硬币 coins 和一个总金额 amount
@@ -498,13 +661,16 @@ public int coinChange(int[] coins, int amount) {
     return dp[amount] == Integer.MAX_VALUE ? -1 : dp[amount];
 }
 ```
+
+
 # 子序列
+
 
 ## -392-判断子序列_简单
 
-判断**s**是否为**t**的子序列
 
 ```java
+判断s是否为t的子序列
 输入：s = "abc", t = "ahbgdc"
 输出：true
 // 双指针
@@ -532,7 +698,10 @@ public boolean isSubsequence(String s, String t) {
     return false;
 }
 ```
+
+
 ## -53-最大子序和_简单
+
 
 ```java
 给定一个整数数组 nums ，找到一个具有最大和的连续子数组（子数组最少包含一个元素），返回其最大和。
@@ -559,7 +728,11 @@ public int maxSubArray(int[] nums) {
 }
 ```
 
-## -300-最长递增子序列(返回长度)_中等
+
+## -152-乘积最大子序列_中等
+ 
+## -300-最长递增子序列的长度_中等
+
 
 ```java
 输入：nums = [10,9,2,5,3,7,101,18]
@@ -588,7 +761,24 @@ public int lengthOfLIS(int[] nums) {
     return result;
 }
 ```
-## -674-最长连续递增子序列_简单
+## -673-最长递增子序列的个数_中等
+```java
+找到最长递增子序列的个数。
+输入: [1,3,5,4,7]
+输出: 2
+解释: 有两个最长递增子序列，分别是 [1, 3, 4, 7] 和[1, 3, 5, 7]。
+```
+ 
+## -673-最长递增子序列的个数
+```java
+找到最长递增子序列的个数
+输入: [1,3,5,4,7]
+输出: 2
+解释: 有两个最长递增子序列，分别是 [1, 3, 4, 7] 和[1, 3, 5, 7]。
+
+```
+## -674-最长连续递增子序列的长度_简单
+
 
 ```java
 输入：nums = [1,3,5,4,7]
@@ -615,23 +805,32 @@ public int findLengthOfLCIS(int[] nums) {
     return result;
 }
 ```
+## -1143-最长公共子序列_中等
+## -516-最长回文子序列_中等
+## -491-递增子序列_中等
 
 
 # 股票相关- 动态规划
 
+
 [https://mp.weixin.qq.com/s/169FdlShVT1_GhLWA8eJlA](https://mp.weixin.qq.com/s/169FdlShVT1_GhLWA8eJlA?fileGuid=p3cxcwXqc6QVkk6k)
+
 
 ## -121-买卖股票的最佳时机_简单
 
-只允许买卖一次
 
-```plain
+```
+只允许买卖一次
 输入: [7,1,5,3,6,4]
 输出: 5
 ```
-![](https://youpaiyun.zongqilive.cn/image/20210514095707.png)
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095720.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095707.png#id=WUqnH&originHeight=583&originWidth=886&originalType=binary&status=done&style=none)
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095720.png#id=uY2OM&originHeight=672&originWidth=866&originalType=binary&status=done&style=none)
+
 
 ```java
 public static int maxProfit(int[] prices) {
@@ -650,7 +849,9 @@ public static int maxProfit(int[] prices) {
 }
 ```
 
+
 ## -122-买卖股票的最佳时机II_简单
+
 
 ```java
 多次买卖
@@ -674,9 +875,17 @@ public static int maxProfit(int[] prices) {
     return Math.max(dp[prices.length - 1][0], dp[prices.length - 1][1]);
 }
 ```
+
+
 ## -309-最佳买卖股票时机含冷冻期_中等
 
+
 ```java
+设计一个算法计算出最大利润。在满足以下约束条件下，你可以尽可能地完成更多的交易（多次买卖一支股票）:
+
+你不能同时参与多笔交易（你必须在再次购买前出售掉之前的股票）。
+卖出股票后，你无法在第二天买入股票 (即冷冻期为 1 天)。
+
 输入: [1,2,3,0,2]
 输出: 3 
 解释: 对应的交易状态为: [买入, 卖出, 冷冻期, 买入, 卖出]
@@ -696,30 +905,43 @@ public int maxProfit(int[] prices) {
   return Math.max(dp[prices.length - 1][0], dp[prices.length - 1][1]);
 }
 ```
+
+
 ## -123-买卖股票的最佳时机III_困难- 过
 
+
 只能交易2次
+
 
 [https://www.bilibili.com/video/BV1ED4y1Q7AP](https://www.bilibili.com/video/BV1ED4y1Q7AP?fileGuid=p3cxcwXqc6QVkk6k)
 
 
 ## -200-岛屿数量_中等
 
+
 给你一个由`'1'`（陆地）和`'0'`（水）组成的的二维网格，请你计算网格中岛屿的数量。
+
 
 输入：grid = [
 
+
 ["1","1","1","1","0"],
+
 
 ["1","1","0","1","0"],
 
+
 ["1","1","0","0","0"],
+
 
 ["0","0","0","0","0"]
 
+
 ]
 
+
 输出：1
+
 
 ```java
 // 像扫雷游戏, 点中1,  周围的全变 0
@@ -750,36 +972,73 @@ private void dfs(char[][] grid, int col, int row) {
 }
 ```
 
+
 # 链表相关
+
 
 ## 方法总结
 
+
 1. 快慢指针
+
+
 
 快慢指针, 慢指针走1步, 快指针走2步
 
+
 2. 虚拟节点
+
+
 
 做链表题经常会产生困惑：
 
+
 什么时候用创建一个dummy node，什么时候不用创建？
+
 
 一般来说，如果head可能发生变化，就创建一个dummy，然后
 
+
 虚拟节点套路
+
 
 虚拟节点, 必跟着一个 current 指向
 
+
 ListNode dummyNode = new ListNode(-1);
+
 
 dummyNode.next = head
 
 ListNode currentNode = dummyNode;
 
+## -203-移除链表元素_简单
+
+```java
+给你一个链表的头节点 head 和一个整数 val ，请你删除链表中所有满足 Node.val == val 的节点，并返回 新的头节点 。
+public ListNode removeElements(ListNode head, int val) {
+    ListNode dummyNode = new ListNode(-1);
+    dummyNode.next = head;
+    ListNode cur = dummyNode;
+    while (cur.next != null) {
+        if (cur.next.val == val) {
+            cur.next = cur.next.next;
+        }else {
+            cur = cur.next;
+        }
+    }
+    return dummyNode.next;
+}
+```
+
+
+
 
 ## (NC4)-141-判断环形链表_简单
 
+
 HashSet 和 快慢指针
+
 
 ```java
 // 快慢指针
@@ -799,8 +1058,13 @@ public boolean hasCycle(ListNode head) {
     return false;
 }
 ```
+
+
 问题扩展:
+
+
 ## 求出环的长度
+
 
 ```java
 快慢指针相遇后继续移动，直到第二次相遇。两次相遇间的移动次数即为环的长度。
@@ -825,9 +1089,13 @@ public boolean hasCycle(ListNode head) {
         return 0;
 }
 ```
+
+
 ## **链表中倒数第k个节点**
 
-![](https://youpaiyun.zongqilive.cn/image/20210514095914.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095914.png#id=xAYwg&originHeight=340&originWidth=561&originalType=binary&status=done&style=none)
+
 
 ```java
 设置快和慢两个指针，初始化时快指针比慢指针 先移动k次，
@@ -845,7 +1113,10 @@ public static int kthToLast(ListNode head, int k) {
     return slow.val;
 }
 ```
+
+
 ## -19-删除链表的倒数第 N 个结点_中等
+
 
 ```java
 public ListNode removeNthFromEnd(ListNode head, int n) {
@@ -867,24 +1138,30 @@ public ListNode removeNthFromEnd(ListNode head, int n) {
 }
 ```
 
+
 ## -876-链表的中间结点_简单
 
+
 求链表的中间节点，如果链表节点数为奇数，返回中间节点；如果链表节点数为偶数，返回中间两个节点的任意一个。
+
 
 ```java
 可以定义两个指针，同时从链表头节点出发，一个指针一次走一步，一个指针一次走两步。当走的快的指针走到链表的末尾时，走的慢的指针正好在链表的中间。
 public ListNode middleNode(ListNode head) {
-    ​ListNode slow = head, fast = head
+    ListNode slow = head, fast = head
     while (fast != null && fast.next != null) {
-        ​slow = slow.next
-        ​fast = fast.next.next
-    }​
+        slow = slow.next
+        fast = fast.next.next
+    }
     return slow;
 }
 ```
-## -142-环形链表II_中等_链表中环的入口节点
 
-```plain
+
+## -142-链表中环的入口节点_中等
+
+
+```java
 第一步是确定该链表有没有环, 否存在环，若有找到一快一慢的两个指针相遇的节点
 public ListNode detectCycle(ListNode head){
         ListNode slow=head;
@@ -905,9 +1182,11 @@ public ListNode detectCycle(ListNode head){
     }
 ```
 
+
 ## (NC78)-206-反转链表_简单 - 双指针
 
-```plain
+
+```java
 * 输入: 1->2->3->4->5->NULL
 * 输出: 5->4->3->2->1->NULL
 * 进阶:
@@ -926,14 +1205,19 @@ public static ListNode reverseListV2(ListNode head) {
 }
 ```
 
+
 ## (NC21)-92-反转链表II_中等(局部翻转, 重点)
 
-```plain
+
+```
 反转从位置 m 到 n 的链表。请使用一趟扫描完成反转
 输入: 1->2->3->4->5->NULL, m = 2, n = 4
 输出: 1->4->3->2->5->NULL
 ```
-![](https://youpaiyun.zongqilive.cn/image/20210514095936.png)
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514095936.png#id=ZantM&originHeight=343&originWidth=766&originalType=binary&status=done&style=none)
+
 
 ```java
 public ListNode reverseBetween(ListNode head, int m, int n) {
@@ -963,7 +1247,10 @@ public ListNode reverseBetween(ListNode head, int m, int n) {
     return dummyNode.next;
 }
 ```
+
+
 ## -25- K 个一组翻转链表_困难
+
 
 ```java
 输入：head = [1,2,3,4,5], k = 3
@@ -995,7 +1282,10 @@ private ListNode reverse206(ListNode head, ListNode tail) {
     return newHead;
 }
 ```
+
+
 ## -24-两两交换链表中的节点_中等
+
 
 ```java
 [1,2,3,4,5]
@@ -1019,10 +1309,11 @@ public ListNode swapPairs(ListNode head) {
     secondNode.next = firstNode;
     return secondNode;
 }
-
 ```
 
+
 ## -21-合并两个有序链表_简单
+
 
 ```java
 public ListNode mergeTwoLists(ListNode linked1, ListNode linked2) {
@@ -1054,7 +1345,10 @@ public ListNode mergeTwoLists(ListNode linked1, ListNode linked2) {
     return dummy.next;
 }
 ```
+
+
 ## -369-单链表加1_中等
+
 
 ```java
 输入: [1,2,3]
@@ -1088,11 +1382,16 @@ public ListNode plusOne(ListNode head) {
     }
 }
 ```
+
+
 ## -2-链表相加_中等
 
-![图片](https://uploader.shimo.im/f/VDDLq1VNCzazWjFN.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k)
+
+![](https://uploader.shimo.im/f/VDDLq1VNCzazWjFN.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k#id=UdQET&originalType=binary&status=done&style=none)
+
 
 表示两个非负的整数。它们每位数字都是按照逆序的方式存储的
+
 
 ```java
 public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
@@ -1140,9 +1439,13 @@ public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
         return dummyNode.next;
     }
 ```
+
+
 ## -445-链表相加II_中等
 
+
 非逆序
+
 
 ```java
 数字最高位位于链表开始位置。它们的每个节点只存储一位数字。将这两数相加会返回一个新的链表。
@@ -1177,23 +1480,27 @@ public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
 }
 ```
 
+
 ## -160-相交链表_简单
 
-![](https://youpaiyun.zongqilive.cn/image/20210516093202.png)
 
-
-
-
-
-
-
-
-
-
-
+![](https://youpaiyun.zongqilive.cn/image/20210516093202.png#id=j1I5B&originHeight=556&originWidth=818&originalType=binary&status=done&style=none)
+```java
+public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+    ListNode A = headA;
+    ListNode B = headB;
+    while (A != B) {
+        A = A == null ? headB : A.next;
+        B = B == null ? headA : B.next;
+    }
+    // 确保不能为 null
+    return A == null ? null : A;
+}
+```
 
 
 ## -24-两两交换链表中的节点_中等
+
 
 ```java
 [1,2,3,4,5]
@@ -1217,16 +1524,292 @@ public ListNode swapPairs(ListNode head) {
     secondNode.next = firstNode;
     return secondNode;
 }
-
 ```
+## -21-合并两个有序链表_简单
+
+
+```java
+public ListNode mergeTwoLists(ListNode linked1, ListNode linked2) {
+    //下面4行是空判断
+    if (linked1 == null) {
+        return linked2;
+    }
+    if (linked2 == null) {
+        return linked1;
+    }
+    // dummy: 傀儡, 假
+    ListNode dummy = new ListNode(0);
+    // cur指针是复制的dummy指针，dummy始终都在头节点处，而cur相当于不断地在穿针引线串联增加节点
+    ListNode curr = dummy;
+    while (linked1 != null && linked2 != null) {
+        //比较一下，哪个小就把哪个放到新的链表中
+        if (linked1.val <= linked2.val) {
+            curr.next = linked1;
+            linked1 = linked1.next;
+        } else {
+            curr.next = linked2;
+            linked2 = linked2.next;
+        }
+        curr = curr.next;
+    }
+    //然后把那个不为空的链表挂到新的链表中
+    curr.next = linked1 == null ? linked2 : linked1;
+    // dummy是虚拟节点，需要返回的是它后面的链表，也就是dummy.next
+    return dummy.next;
+}
+```
+
+
+## -369-单链表加1_中等
+
+
+```java
+输入: [1,2,3]
+输出: [1,2,4]
+Stack<Integer> stack  = new Stack<>();
+public ListNode plusOne(ListNode head) {
+    if (head == null) {
+        return head;
+    }
+    ListNode cur = head;
+    while (cur!=null) {
+        stack.push(cur.val);
+        cur = cur.next;
+    }
+    int carry = 1;
+    while (!stack.isEmpty()) {
+        Integer tmp = stack.pop();
+        int sum = tmp.val + carry;
+        carry = sum / 10;
+        tmp.val = sum % 10;
+        if (carry == 0) {
+            return head;
+        }
+    }
+    if (carry != 0) {
+        ListNode new_head = new ListNode(carry);
+        new_head.next = head;
+        return new_head;
+    }else {
+        return head;
+    }
+}
+```
+
+
+## -2-链表相加_中等
+
+
+![](https://uploader.shimo.im/f/VDDLq1VNCzazWjFN.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k#id=mboj8&originalType=binary&status=done&style=none)
+
+
+表示两个非负的整数。它们每位数字都是按照逆序的方式存储的
+
+
+```java
+public ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+        ListNode dummyNode = new ListNode(-1);
+        ListNode currentNode = dummyNode;
+        //进位
+        int carry = 0;
+        while (l1 != null && l2 != null) {
+            int tmp = l1.val + l2.val + carry;
+            int val = tmp % 10;
+            carry = tmp / 10;
+            ListNode node = new ListNode(val);
+            currentNode.next = node;
+            currentNode = node;
+            l1 = l1.next;
+            l2 = l2.next;
+        }
+        if (l1 != null) {
+            while (l1 != null) {
+                int tmp = l1.val + carry;
+                int val = tmp % 10;
+                carry = tmp / 10;
+                ListNode node = new ListNode(val);
+                currentNode.next = node;
+                currentNode = node;
+                l1 = l1.next;
+            }
+        }
+        if (l2 != null) {
+            while (l2 != null) {
+                int tmp = l2.val + carry;
+                int val = tmp % 10;
+                carry = tmp / 10;
+                ListNode node = new ListNode(val);
+                currentNode.next = node;
+                currentNode = node;
+                l2 = l2.next;
+            }
+        }
+        if (carry != 0) {
+            ListNode node = new ListNode(carry);
+            currentNode.next = node;
+            currentNode = node;
+        }
+        return dummyNode.next;
+    }
+```
+
+
+## -445-链表相加II_中等
+
+
+非逆序
+
+
+```java
+数字最高位位于链表开始位置。它们的每个节点只存储一位数字。将这两数相加会返回一个新的链表。
+输入：(7 -> 2 -> 4 -> 3) + (5 -> 6 -> 4)
+输出：7 -> 8 -> 0 -> 7
+public static ListNode addTwoNumbers(ListNode l1, ListNode l2) {
+    Stack<Integer> s1 = new Stack<>();
+    Stack<Integer> s2 = new Stack<>();
+    // 利用栈
+    while (l1 != null) {
+        s1.push(l1.val);
+        l1 = l1.next;
+    }
+    while (l2 != null) {
+        s2.push(l2.val);
+        l2 = l2.next;
+    }
+    ListNode newHead = null;
+    int carry = 0;
+    while (!s1.isEmpty() || !s2.isEmpty() || carry > 0) {
+        int n1 = s1.isEmpty() ? 0 : s1.pop();
+        int n2 = s2.isEmpty() ? 0 : s2.pop();
+        int sum = n1 + n2 + carry;
+        carry = sum / 10;
+        int val = sum % 10;
+        ListNode node = new ListNode(val);
+        // 头插法
+        node.next = newHead;
+        newHead = node;
+    }
+    return newHead;
+}
+```
+
+
+
+## -24-两两交换链表中的节点_中等
+
+
+```java
+[1,2,3,4,5]
+[2,1,4,3,5]
+/**
+ * 递归实现方式
+ *
+ * 从链表的头节点 head 开始递归。
+ * 每次递归都负责交换一对节点。由 firstNode 和 secondNode表示要交换的两个节点。
+ * 下一次递归则是传递的是下一对需要交换的节点。若链表中还有节点，则继续递归。
+ * 交换了两个节点以后，返回 secondNode，因为它是交换后的新头。
+ * 在所有节点交换完成以后，我们返回交换后的头，实际上是原始链表的第二个节点。
+ */
+public ListNode swapPairs(ListNode head) {
+    if ((head == null) || (head.next == null)) {
+        return head;
+    }
+    ListNode firstNode = head;
+    ListNode secondNode = head.next;
+    firstNode.next  = swapPairs(secondNode.next);
+    secondNode.next = firstNode;
+    return secondNode;
+}
+```
+## -234-回文链表_中等
+请判断一个链表是否为回文链表。
+**示例 1:**
+**输入:** 1->2
+**输出:** false
+**输入:** 1->2->2->1
+**输出:** true
+```java
+// 利用栈, 空间是O(n)
+public boolean isPalindrome(ListNode head) {
+    if (head == null || head.next == null) {
+        return true;
+    }
+    Stack<Integer> stack = new Stack<>();
+    ListNode cur = head;
+    while (cur != null) {
+        stack.push(cur.val);
+        cur = cur.next;
+    }
+    while (head != null) {
+        Integer val = stack.pop();
+        if (!val.equals(head.val)) {
+            return false;
+        }
+        head = head.next;
+    }
+    return true;
+}
+```
+方法2: 空间O(1)
+![](https://youpaiyun.zongqilive.cn/image/20210516160907.png#id=jntHo&originHeight=490&originWidth=977&originalType=binary&status=done&style=none)
+```java
+public boolean isPalindrome(ListNode head) {
+    if (head == null || head.next == null) {
+        return true;
+    }
+    ListNode fast = head;
+    ListNode slow = head;
+    ListNode pre = head;
+    // 找链表中间节点
+    while (fast != null && fast.next != null) {
+        fast = fast.next.next;
+        pre = slow;
+        slow = slow.next;
+    }
+
+    ListNode newHead = null;
+    if (fast == null) {
+        // 偶数个 Node节点
+        // 切断联系
+        pre.next = null;
+        // 反转链表
+        newHead = reverse(slow);
+    } else {
+        // 奇数个 Node节点
+        // 切断联系
+        pre.next = null;
+        ListNode next = slow.next;
+        slow.next = null;
+        // 反转链表
+        newHead = reverse(next);
+    }
+    // 挨个比较
+    while (head != null) {
+        if (head.val != newHead.val) {
+            return false;
+        }
+        head = head.next;
+        newHead = newHead.next;
+    }
+    return true;
+}
+```
+
+
+
+
 
 # 二叉树相关
 
+
 ## 二叉树的遍历 前, 中, 后, 层
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100002.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100002.png#id=Yotxx&originHeight=375&originWidth=420&originalType=binary&status=done&style=none)
+
 
 ### 前序遍历1  2  4  5  7  8  3  6
+
 
 ```java
 递归写法
@@ -1244,7 +1827,7 @@ public static void preorderTraversal(TreeNode root) {
     // 用来暂存节点的栈
     Stack<TreeNode> stack = new Stack<TreeNode>();
     // 新建一个游标节点为根节点
-    TreeNodenode = root;
+    TreeNode node = root;
     // 当遍历到最后一个节点的时候，无论它的左右子树都为空，并且栈也为空
     // 所以，只要不同时满足这两点，都需要进入循环
     while (node!= null || !stack.isEmpty()) {
@@ -1262,7 +1845,10 @@ node = node.left;
     }
 }
 ```
+
+
 ### 中序遍历4  2  7  5  8  1  3  6
+
 
 ```java
 LinkedList<Integer> list = new LinkedList<>();
@@ -1294,7 +1880,10 @@ public List<Integer> inorderTraversal(TreeNode root) {
     return list;
 }
 ```
+
+
 ### 后序遍历4  7  8  5  2  6  3  1
+
 
 ```java
 LinkedList<Integer> list = new LinkedList<>();
@@ -1353,7 +1942,9 @@ public static void postorderTraversal(TreeNode root) {
 }
 ```
 
+
 ### 层序遍历1  2  3  4  5  6  7  8
+
 
 ```java
 Queue<TreeNode> queue = new LinkedList<TreeNode>();
@@ -1380,10 +1971,54 @@ public List<Integer> levelOrderV(TreeNode root) {
     return list;
 }
 ```
-## _103_蛇型遍历_中等
 
-![图片](https://uploader.shimo.im/f/SrbEUA56vM6h2U6P.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k)
 
+## -199-二叉树的右视图_中等
+```java
+给定一棵二叉树，想象自己站在它的右侧，按照从顶部到底部的顺序，返回从右侧所能看到的节点值。
+输入: [1,2,3,null,5,null,4]
+输出: [1, 3, 4]
+解释:
+
+   1            <---
+ /   \
+2     3         <---
+ \     \
+  5     4       <---
+
+ // 利用层序遍历
+private List<Integer> res = new LinkedList<>();
+public List<Integer> rightSideView(TreeNode root) {
+    if (root == null) {
+        return res;
+    }
+    Queue<TreeNode> queue = new LinkedList<>();
+    queue.add(root);
+    while (!queue.isEmpty()) {
+        int size = queue.size();
+        for (int i = 0; i < size; i++) {
+            TreeNode node = queue.poll();
+            if (node.left != null) {
+                queue.add(node.left);
+            }
+            if (node.right != null) {
+                queue.add(node.right);
+            }
+            if (i==size-1) {
+                res.add(node.val);
+            }
+        }
+    }
+    return res;
+}
+```
+
+
+
+
+## _-103-_蛇型(锯齿形)遍历_中等
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1011530/1621146891782-2caa818d-6edf-4980-add5-c0d4dcb2e0dd.png#clientId=uda47b892-b918-4&from=paste&height=378&id=ue624d2ef&margin=%5Bobject%20Object%5D&name=image.png&originHeight=378&originWidth=792&originalType=binary&size=27077&status=done&style=none&taskId=u29429e0b-83dd-4c6f-b3a5-751f4f9f024&width=792)
+层序遍历的变形
 ```java
 // 一维数组
 List<Integer> res2 = new LinkedList<>();
@@ -1395,9 +2030,10 @@ public void zigzagLevelOrder(TreeNode root) {
     queue.add(root);
     while (!queue.isEmpty()) {
         LinkedList<Integer> tmp = new LinkedList<>();
-        for (int i = 0; i < queue.size(); i++) {
+        int size = queue.size();
+        for (int i = 0; i < size; i++) {
             TreeNode node = queue.poll();
-            if (flag == 0) {
+            if (flag == true) {
                 tmp.add(node.val);
             } else {
                 // 头插法
@@ -1411,6 +2047,7 @@ public void zigzagLevelOrder(TreeNode root) {
             }
         }
         res2.addAll(tmp);
+        // 变换标志
         flag = !flag;
     }
 }
@@ -1451,7 +2088,56 @@ public List<List<Integer>> zigzagLevelOrder2(TreeNode root) {
 ```
 
 
+## 概念: 二叉树类型区分
+### 满二叉
+
+1. 除了叶结点外每一个结点都有左右子叶节点
+1. 叶子结点都处在最底层的二叉树
+
+
+
+### 完全二叉树
+在满叉树的基础上，我在最后一层从右往左删去若干节点，得到的都是完全二叉树
+所以说，满二叉树一定是完全二叉树，但是完全二叉树不一定是满二叉树
+
+
+### 平衡二叉树
+树的左右子树的高度差不超过1的数
+是二叉搜索树的一个进化体
+
+
+## -98-验证二叉搜索树_中等
+
+
+```java
+// 利用 中序遍历 有序
+public boolean isValidBST(TreeNode root) {
+    if (root == null) {
+        return true;
+    }
+    Stack<TreeNode> stack = new Stack<>();
+    TreeNode node = root;
+    TreeNode pre = null;
+    while (node != null || !stack.isEmpty()) {
+        if (node != null) {
+            stack.push(node);
+            node = node.left;
+        }else {
+            node = stack.pop();
+            if (pre != null && node.val <= pre.val)
+                return false;
+            //保存前一个访问的结点
+            pre = node;
+            node = node.right;
+        }
+    }
+    return true;
+}
+```
+
+
 ## -110-验证平衡二叉树_简单
+
 
 ```java
 // 一个二叉树每个节点 的左右两个子树的高度差的绝对值不超过 1 。
@@ -1465,6 +2151,7 @@ public boolean isBalanced(TreeNode root) {
     return isBalanced(root.left) && isBalanced(root.right)
             && Math.abs(depth(root.left) - depth(root.right)) <= 1;
 }
+
 private int depth(TreeNode root) {
     if (root == null) {
         return 0;
@@ -1472,48 +2159,19 @@ private int depth(TreeNode root) {
     return Math.max(depth(root.left), depth(root.right)) + 1;
 }
 ```
-## -98-验证二叉搜索树_中等
-
-```java
-// 利用 中序遍历 有序
-public boolean isValidBST(TreeNode root) {
-    if (root == null) {
-        return true;
-    }
-    Stack<TreeNode> stack = new Stack<>();
-    TreeNode pre = null;
-    while (root != null || !stack.isEmpty()) {
-        if (root != null) {
-            stack.push(root);
-            root = root.left;
-        }else {
-            root = stack.pop();
-            if (pre != null && pre.val >= root.val) {
-                return false;
-            }
-            //保存前一个访问的结点
-            pre = root;
-            root = root.right;
-        }
-    }
-    return true;
-}
-```
 ## -101-对称二叉树_简单
 
-例如，二叉树 [1,2,2,3,4,4,3] 是对称的。
 
-1
 
-/ \
-
-2   2
-
-/ \ / \
-
-3  4 4  3
 
 ```java
+  1
+   / \
+  2   2
+ / \ / \
+3  4 4  3
+ 
+ 
 public boolean isSymmetric(TreeNode root) {
     //第一次传root让下面顺便进行空判断
     return check(root.left, root.right);
@@ -1532,8 +2190,13 @@ public boolean check(TreeNode a, TreeNode b) {
     }    
 }
 ```
+
+
 ## -226-翻转二叉树_简单
+
+
 根节点的左右子节点 互换
+
 
 ```java
 public TreeNode invertTree(TreeNode root) {
@@ -1548,15 +2211,22 @@ public TreeNode invertTree(TreeNode root) {
     return root;
 }
 ```
+
+
 ## -235-二叉搜索树的最近公共祖先_简单
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100048.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100048.png#id=l2Vny&originHeight=190&originWidth=200&originalType=binary&status=done&style=none)
+
 
 输入: root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8
 
+
 输出: 6
 
+
 解释: 节点 2 和节点 8 的最近公共祖先是 6。
+
 
 ```java
 public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
@@ -1574,9 +2244,13 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
         return root;
 }
 ```
+
+
 ## -236-二叉树的最近公共祖先_中等
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100117.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100117.png#id=zozci&originHeight=190&originWidth=200&originalType=binary&status=done&style=none)
+
 
 ```java
 /**
@@ -1604,12 +2278,14 @@ public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
 ```
 
 
-
 ## -230-二叉搜索树中第K小的元素_中等 或者 第K大元素
 
-第K小: 中序遍历 数组升序递增,  第k个元素就是
 
-第K大: 中序遍历的逆序 数组升序递减,  第k个元素就是
+第K小: 中序遍历 数组升序递增,  第k个元素就是
+
+
+第K大: 中序遍历的逆序 数组升序递减,  第k个元素就是
+
 
 ```java
 /**
@@ -1661,23 +2337,10 @@ public int kthLargest(TreeNode root, int k) {
     }
 ```
 
+
 ## -257-二叉树的所有路径_简单
-
-输入:
-
-1
-
-/   \
-
-2     3
-
-\
-
-5
-
-输出: ["1->2->5", "1->3"]
-
 解释: 所有根节点到叶子节点的路径为: 1->2->5, 1->3
+
 
 ```java
 List<Integer> path = new ArrayList<>();
@@ -1700,29 +2363,41 @@ public void dfs(TreeNode root) {
 }
 ```
 
+
 ## -112-路径总和_简单
+
 
 判断该树中是否存在根节点到叶子节点的路径，这条路径上所有节点值相加等于目标和。
 
+
 给定如下二叉树，以及 目标和sum = 22，
+
 
 5
 
+
 / \
+
 
 4   8
 
+
 /   / \
+
 
 11  13  4
 
+
 /  \      \
+
 
 7    2      1
 
+
 返回 true, 因为存在目标和为 22 的根节点到叶子节点的路径 5->4->11->2。
 
-```plain
+
+```
 public boolean hasPathSum(TreeNode root, int sum) {
     if (root == null) {
         return false;                // 遍历到null节点
@@ -1735,9 +2410,13 @@ public boolean hasPathSum(TreeNode root, int sum) {
     return hasPathSum(root.left, sum) || hasPathSum(root.right, sum); 
 }
 ```
+
+
 ## -113-路径总和II中等
 
+
 找到所有从根节点到叶子节点路径总和等于给定目标和的路径
+
 
 ```java
 private List<Integer> path = new ArrayList<>();
@@ -1766,7 +2445,9 @@ public void help(TreeNode root, int sum) {
 }
 ```
 
+
 ## -437-路径总和III_中等
+
 
 ```java
 找出路径和等于给定数值的路径总数。
@@ -1794,7 +2475,10 @@ public void Sum(TreeNode root, int sum){
     Sum(root.right,sum);
 }
 ```
+
+
 ## -104-二叉树的最大深度_简单 或 最小深度
+
 
 ```java
 // 最大深度
@@ -1828,7 +2512,10 @@ public int minDepth(TreeNode root) {
     return 1+ Math.min(leftHeight, rightHeight);
 }
 ```
+
+
 ## -617-合并二叉树_简单
+
 
 ```java
 给定两个二叉树，想象当你将它们中的一个覆盖到另一个上时，两个二叉树的一些节点便会重叠。
@@ -1849,9 +2536,13 @@ public TreeNode mergeTrees(TreeNode t1, TreeNode t2) {
         return result;
     }
 ```
+
+
 ## -114-二叉树展开为链表_中等
 
-![图片](https://uploader.shimo.im/f/6tMR8ut1e8Xcg3Cs.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k)
+
+![](https://uploader.shimo.im/f/6tMR8ut1e8Xcg3Cs.png!thumbnail?fileGuid=p3cxcwXqc6QVkk6k#id=K5TbL&originalType=binary&status=done&style=none)
+
 
 ```java
 public void flatten(TreeNode root) {
@@ -1883,15 +2574,35 @@ public TreeNode help(TreeNode root) {
     return root;
 }
 ```
-
+## -116-填充每个节点的下一个右侧节点指针_中等
+![image.png](https://cdn.nlark.com/yuque/0/2021/png/1011530/1621147640331-fc3941e0-9876-4b24-986b-065222b2e09a.png#clientId=uf3646339-6abc-4&from=paste&height=359&id=uaebb9c50&margin=%5Bobject%20Object%5D&name=image.png&originHeight=359&originWidth=830&originalType=binary&size=55846&status=done&style=none&taskId=u5962ced6-7e9d-4e7c-96ff-e9fb48dc270&width=830)
+```java
+public Node connect(Node root) {
+    if (root == null) {
+        return null;
+    }
+    if (root.left == null && root.right == null) {
+        return root;
+    }
+    root.left.next = root.right;
+    if (root.next != null) {
+        root.right.next = root.next.left;
+    }
+    connect(root.left);
+    connect(root.right);
+    return root;
+}
+```
 ## 938. 二叉搜索树的范围和
 
 
 # 全排列-回溯(递归回溯)
 
+
 [https://labuladong.gitbook.io/algo/suan-fa-si-wei-xi-lie/hui-su-suan-fa-dfs-suan-fa/hui-su-suan-fa-xiang-jie-xiu-ding-ban](https://labuladong.gitbook.io/algo/suan-fa-si-wei-xi-lie/hui-su-suan-fa-dfs-suan-fa/hui-su-suan-fa-xiang-jie-xiu-ding-ban?fileGuid=p3cxcwXqc6QVkk6k)
 
-```plain
+
+```
 解决一个回溯问题，实际上就是一个决策树的遍历过程
 只需要思考 3 个问题：
 1、路径：也就是已经做出的选择。
@@ -1899,9 +2610,11 @@ public TreeNode help(TreeNode root) {
 3、结束条件：也就是到达决策树底层，无法再做选择的条件。
 ```
 
+
 回溯算法的框架：
 
-```plain
+
+```
 result = []
 def backtrack(路径, 选择列表):
     if 满足结束条件:
@@ -1913,15 +2626,14 @@ def backtrack(路径, 选择列表):
         撤销选择
 其核心就是 for 循环里面的递归，在递归调用之前「做选择」，在递归调用之后「撤销选择」
 ```
+
+
 ## -46-全排列_简单
-
+```java
 没有重复的数
-
-```plain
 输入：nums = [1,2,3]
 输出：[[1,2,3],[1,3,2],[2,1,3],[2,3,1],[3,1,2],[3,2,1]]
-```
-```java
+
 private List res = new ArrayList<List<Integer>>();
 public List<List<Integer>> permute(int[] nums) {
     // 路径, 选择列表
@@ -1955,10 +2667,10 @@ private void m(int[] nums, List<Integer> path,  boolean[] visited) {
     }
 }
 ```
+
+
 ## -47-全排列II_中等
-
 包含重复数字
-
 ```java
 private List result = new ArrayList<List<Integer>>();
 public List<List<Integer>> permuteUnique(int[] nums) {
@@ -1990,9 +2702,13 @@ public void helper(int[] nums, List<Integer> path, boolean[] visited) {
     }
 }
 ```
+
+
 ## -78-子集_中等-dfs+回溯
 
+
 不重复的数组
+
 
 ```java
 List<List<Integer>> result = new LinkedList<>();
@@ -2013,9 +2729,13 @@ public void helper(int[] arr,List<Integer> path, int start) {
     }
 }
 ```
+
+
 ## -90-子集II_中等
 
+
 数组存在重复
+
 
 ```java
 List<List<Integer>> result = new LinkedList<>();
@@ -2031,7 +2751,7 @@ public void helper(int[] arr, List<Integer> path, int start) {
         return;
     }
     for (int i = start; i < arr.length; i++) {
-        if (i-start >0  && arr[i] == arr[i - 1]) {
+        if (i > start && arr[i] == arr[i - 1]) {
             // 去掉重复
             continue;
         }
@@ -2043,9 +2763,12 @@ public void helper(int[] arr, List<Integer> path, int start) {
 }
 ```
 
+
 ## -39-组合求和_中等
 
+
 原数组无重复元素, 元素可以使用多次
+
 
 ```java
 输入：candidates = [2,3,6,7], target = 7,
@@ -2077,9 +2800,12 @@ private void help(int[] arr, List<Integer> path, int target,int start) 
     }
 ```
 
+
 ## -40-组合求和II_中等
 
+
 原数组有重复元素, 元素可以使用1次
+
 
 ```java
 private List result = new ArrayList<List<Integer>>();
@@ -2107,23 +2833,29 @@ private void help(int[] arr,  int target, List<Integer> path, int start) {
 }
 ```
 
+
 ## 寻找全排列的下一个数
+
 
 在一个整数所包含数字的全部组合中, 找到一个大于且仅大于 原数的新整数
 
+
 如:
+
 
 输入 12345, 则返回 12354
 
+
 12354, 则返回 12435
+
 
 12435, 则返回 12453
 
-
-
 # 数组
 
+
 ## -4-寻找两个正序数组的中位数_困难
+
 
 ```
 给定两个大小分别为 m 和 n 的正序（从小到大）数组 nums1 和 nums2。请你找出并返回这两个正序数组的 中位数 。
@@ -2134,10 +2866,8 @@ private void help(int[] arr,  int target, List<Integer> path, int start) {
 ```
 
 
-
-
-
 ## -215-数组中的第K个最大(小)元素_中等
+
 
 ```java
 ## 思路1: 
@@ -2182,15 +2912,75 @@ private int partition(int[] a, int left, int right) {
     }
     swap(a, left, mid);
     return left;
-} 
+}
 ```
+
+## 最小的k个数_中等
+
+```java
+输入：arr = [3,2,1], k = 2
+输出：[1,2] 或者 [2,1]
+//方法1: 利用快排 找到第K个数, 退出 
+public static int[] smallestK(int[] arr, int k) {
+    if (k >= arr.length) {
+        return arr;
+    }
+    int left = 0;
+    int high = arr.length - 1;
+    int targrt = k - 1;
+    while (left < high) {
+        int pos = partition(arr, left, high);
+        if (pos == targrt) {
+          // 找到第k个数退出
+            break;
+        } else if (pos < targrt) {
+            left = pos + 1;
+        } else {
+            high = pos - 1;
+        }
+    }
+  
+    int[] result = new int[k];
+    for (int i = 0; i < k; i++) {
+        result[i] = arr[i];
+    }
+    return result;
+}
+
+
+//方法二: 要遍历全部数组
+public static PriorityQueue<Integer> smallestKV2(int[] arr, int k) {
+    // 最大堆, 堆顶是最大值
+    PriorityQueue<Integer> queue = new PriorityQueue<>((o1, o2) -> {
+        return o2 - o1;
+    });
+    for (int num : arr) {
+        if (queue.size() < k){
+            queue.add(num);
+        } else {
+          if (queue.peek() > num) {
+              queue.poll();
+              queue.add(num);
+          }
+        }
+    }
+    return queue;
+}
+```
+
+
+
 ## -88-合并两个有序数组_简单
+
 
 初始化 nums1 和 nums2 的元素数量分别为 m 和 n 。
 
+
 你可以假设 nums1 有足够的空间
 
+
 请将数组 nums2合并到数组 nums1中，变成一个有序的数组
+
 
 ```java
 // nums1 和 nums2 的元素数量分别为 m 和 n
@@ -2218,7 +3008,10 @@ public void merge(int[] nums1, int m, int[] nums2, int n) {
     }
 }
 ```
+
+
 ## -283-移动零_简单
+
 
 ```java
 public static void moveZeroes(int[] nums) {
@@ -2239,7 +3032,10 @@ public static void moveZeroes(int[] nums) {
     }
 }
 ```
+
+
 ## -26-删除有序数组中的重复项_简单
+
 
 ```java
 给定数组 nums = [1,1,2], 
@@ -2260,7 +3056,9 @@ public int removeDuplicates(int[] nums) {
 }
 ```
 
+
 ## -27-移除数组中指定重复元素_简单
+
 
 ```java
 输入：nums = [3,2,2,3], val = 3
@@ -2281,7 +3079,10 @@ public int removeElement(int[] nums, int val) {
     return slow;
 }
 ```
+
+
 ## -287-寻找数组中重复数_中等
+
 
 ```java
 nums 只有 一个重复的整数 ，找出 这个重复的数 。
@@ -2308,7 +3109,9 @@ public int findDuplicate(int[] nums) {
 }
 ```
 
+
 ## -347-数组中前K个高频元素_中等
+
 
 ```java
 输入: nums = [1,1,1,2,2,3], k = 2
@@ -2319,7 +3122,9 @@ public int[] topKFrequent(int[] nums, int k) {
         map.put(num, map.getOrDefault(num, 0) + 1);
     }
     // 求前 k 大，用小堆，求前 k 小，用大堆
-    PriorityQueue<Map.Entry<Integer, Integer>> heap = new PriorityQueue<>((v1, v2) -> v2.getValue() - v1.getValue());
+    PriorityQueue<Map.Entry<Integer, Integer>> heap =
+    new PriorityQueue<>((v1, v2) -> v2.getValue() - v1.getValue());
+    
     heap.addAll(map.entrySet());
     int[] res = new int[k];
     while (!heap.isEmpty() && k > 0) {
@@ -2328,9 +3133,13 @@ public int[] topKFrequent(int[] nums, int k) {
     return res;
 }
 ```
+
+
 _最最小的K个数
 
+
 ## -189-旋转数组_简单
+
 
 ```java
 /**
@@ -2365,53 +3174,171 @@ private void reverse(int[] nums, int start, int end) {
     }
 }
 ```
+## -35-搜索插入位置_简单
+```java
+给定一个排序数组和一个目标值，在数组中找到目标值，并返回其索引。
+如果目标值不存在于数组中，返回它将会被按顺序插入的位置
+
+// 二分查找
+public int searchInsert(int[] nums, int target) {
+    int left = 0, right = nums.length - 1;
+    while (left <= right) {
+        int mid = (left + right) / 2;
+        if (nums[mid] == target) {
+            return mid;
+        } else if (nums[mid] > target) {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return left;
+}
+```
+## -33-搜索旋转排序数组_中等_看到这里
 
 
 
-# 字符串
+## -219-存在重复元素II_简单
 
-## 滑动窗口
+```java
+判断数组中是否存在两个不同的索引 i 和 j，使得 nums [i] = nums [j]，并且 i 和 j 的差的 绝对值 至多为 k
+输入: nums = [1,2,3,1], k = 3
+输出: true
+// 有点像 滑动窗口
+public boolean containsNearbyDuplicateV2(int[] nums, int k) {
+    int len = nums.length;
+    if (len<2) {
+        return false;
+    }
+    HashSet<Integer> set = new HashSet<>();
+    for (int i = 0; i < len; i++) {
+        if (set.add(nums[i])) {
+            if (set.size() == k+1) {
+                set.remove(nums[i-k]);
+            }
+        }else {
+            return true;
+        }
+    }
+    return false;
+}
+```
+
+## 串烧 33 81 153 154 
+
+```java
+假设按照升序排序的数组在预先未知的某个点上进行了旋转。
+( 例如，数组 [0,1,2,4,5,6,7] 可能变为 [4,5,6,7,0,1,2] )。
+搜索一个给定的目标值，如果数组中存在这个目标值，则返回它的索引，否则返回 -1 。
+注意: 数组元素不重复
+
+// 看这个吧
+public int search(int[] nums, int target) {
+    int left = 0;
+    int right = nums.length - 1;
+    while (left <= right) {
+        int mid = left+(right - left)/ 2;
+        if (nums[mid] == target) {
+            return mid;
+        }
+        if (nums[0] <= nums[mid]) {
+            // 左半段有序
+            if (target >= nums[0] && target < nums[mid]) {
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        } else {
+            // 右半段有序
+            // target 大于重点并且小于最末元素则在
+            if (target <= nums[nums.length - 1] && target > nums[mid]) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+    }
+    return -1;
+}
+
+// 方法二
+public int search(int[] nums, int target) {
+    int cutOff = -1;
+    // 找到 旋转点
+    for (int i = 0; i < nums.length - 1; i++) {
+        if (nums[i] > nums[i + 1]) {
+            cutOff = i;
+            break;
+        }
+    }
+    int left = binarySearch(nums, 0, cutOff, target);
+    int right = binarySearch(nums, cutOff + 1, nums.length - 1, target);
+    return left == -1 ? right : left;
+}
+```
+
+
+# 滑动窗口
+
 
 滑动窗口老猛了, 子串问题全靠它
 
+
 左右指针滑窗口, 一前一后齐头进
+
 
 ## -3-无重复字符的最长子串_中等
 
-```plain
+
+```java
 输入: "abcabcbb"
 输出: 3 
 解释: 因为无重复字符的最长子串是 "abc"，所以其长度为 3。
-示例 2:
+
 // 滑动窗口
-public int lengthOfLongestSubstring2(String s) {
+public  int lengthOfLongestSubstring(String s) {
+    char[] chars = s.toCharArray();
     HashSet<Character> set = new HashSet<>();
     int start = 0, end = 0, maxLen = 0;
     while (end < s.length()) {
-        if (!set.contains(s.charAt(end))) {
-            set.add(s.charAt(end));
+        if (!set.contains(chars[end])) {
+            set.add(chars[end]);
             end++;
             maxLen = Math.max(maxLen, set.size());
         } else {
-            set.remove(s.charAt(start));
+            set.remove(chars[start]);
             start++;
         }
     }
     return maxLen;
 }
 ```
+## -239-滑动窗口最大值_困难
+```java
+一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
+输出：[3,3,5,5,6,7]
+解释：
+滑动窗口的位置                最大值
+---------------               -----
+[1  3  -1] -3  5  3  6  7       3
+ 1 [3  -1  -3] 5  3  6  7       3
+ 1  3 [-1  -3  5] 3  6  7       5
+ 1  3  -1 [-3  5  3] 6  7       5
+ 1  3  -1  -3 [5  3  6] 7       6
+ 1  3  -1  -3  5 [3  6  7]      7
+ 
 
+```
 
-_205_同构字符串_简单
-
-哈希表
-
-_6_Z字形变换_中等(看不懂没做,[https://www.bilibili.com/video/BV1Cv411z7hX)](https://www.bilibili.com/video/BV1Cv411z7hX)?fileGuid=p3cxcwXqc6QVkk6k)
-
+# 字符串
 
 ## -14-最长公共前缀_简单
 
-```plain
+
+```java
 输入：strs = ["flower","flow","flight"]
 输出："fl"
 示例 2：
@@ -2430,16 +3357,16 @@ public String longestCommonPrefix(String[] strs) {
 }
 ```
 
-## -387-字符串中的第一个唯一字符_简单
 
-```plain
+## -387-字符串中的第一个唯一字符_简单
+```java
 给定一个字符串，找到它的第一个不重复的字符，并返回它的索引。如果不存在，则返回 -1。
 s = "leetcode"
 返回 0
 s = "loveleetcode"
 返回 2
-```
-```java
+   
+ // map计数 map(char, num)
 public int firstUniqChar(String s) {
   HashMap<Character, Integer> map = new HashMap<>();
   char[] chars = s.toCharArray();
@@ -2453,14 +3380,177 @@ public int firstUniqChar(String s) {
   }
   return -1;
 }
-
 ```
 
-_125_验证回文串_简单
 
-_680_验证回文字符串Ⅱ_简单
+# 回文相关
+回文: 就是正着读 和 倒着读 是一样的
+## -647-回文子串的个数_中等
+```java
+输入："abc"
+输出：3
+解释：三个回文子串: "a", "b", "c"
+ 
+int num = 0;
+public int countSubstrings(String s) {
+    char[] chars = s.toCharArray();
+    int len = chars.length;
+    for (int i = 0; i < len; i++) {
+        help(chars, len, i, i); //回文串长度为奇数
+        help(chars, len, i, i + 1); //回文串长度为偶数
+    }
+    return num;
+}
+
+public void help(char[] chars, int len, int start, int end) {
+    while (start >= 0 && end < len) {
+        if (chars[start] == chars[end]) {
+            start--;
+            end++;
+            num++;
+        } else {
+            break;
+        }
+    }
+}
+```
+
 
 ## -5-最长回文子串_中等 --中心扩散法
+```java
+输入：s = "babad"
+输出："bab"
+解释："aba" 同样是符合题意的答案。
+
+private int[] range = new int[2];
+public String longestPalindrome(String s) {
+    char[] chars = s.toCharArray();
+    int len = chars.length;
+    if (len == 0 || len == 1) {
+        return s;
+    }
+    for (int i = 0; i < len; i++) {
+        help(chars, len, i, i);
+        help(chars, len, i , i+1);
+    }
+    return s.substring(range[0], range[1]); // 范围是左闭右开 [range[0],range[1])
+}
+
+private void help(char[] chars, int len, int start, int end) {
+    while (start >= 0 && end < len) {
+        if (chars[start] == chars[end]) {
+            start--;
+            end++;
+        } else {
+            break;
+        }
+    }
+    // 注意 start + 1
+    if ((end - (start + 1)) > (range[1] - range[0])) {
+        range[0] = start + 1;
+        range[1] = end;
+    }
+}
+```
+## -9-验证回文数_简单
+```java
+回文数是指正序（从左向右）和倒序（从右向左）读都是一样的整数。例如，121 是回文，而 123 不是。
+输入：x = -121
+输出：false
+解释：从左向右读, 为 -121 。 从右向左读, 为 121- 。因此它不是一个回文数。
+
+public boolean isPalindrome(int x) {
+    String s = String.valueOf(x);
+    char[] chars = s.toCharArray();
+    return checkHuiWen(chars, 0, chars.length - 1);
+}
+
+// 检查是否是回文 通用方法. 双指针法
+private static boolean checkHuiWen(char[] chars, int start, int end) {
+    while (start < end) {
+        if (chars[start] == chars[end]) {
+            start++;
+            end--;
+        } else {
+            return false;
+        }
+    }
+    return true;
+}
+```
+## -125-验证回文串_简单
+```java
+// 验证它是否是回文串，只考虑字母和数字字符，可以忽略字母的大小写。
+public boolean isPalindrome(String s) {
+    char[] chars = s.toCharArray();
+    //只保存字母数字
+    StringBuilder tmp = new StringBuilder(1024);
+    for (int i = 0; i < chars.length; i++) {
+        if (Character.isLetterOrDigit(chars[i])) {
+            tmp.append(Character.toLowerCase(chars[i])) ;
+        }
+    }
+    char[] chars1 = tmp.toString().toCharArray();
+    return checkHuiWen(chars1, 0, chars1.length - 1);
+}
+```
+## -680-验证回文串II_简单
+```java
+给定一个非空字符串 s，最多删除一个字符。判断是否能成为回文字符串。
+输入: "abca"
+输出: True
+解释: 你可以删除c字符。
+
+public boolean validPalindrome(String s) {
+    char[] chars = s.toCharArray();
+
+    int start = 0;
+    int end = s.length() - 1;
+    while (start < end) {
+        if (chars[start] == chars[end]) {
+            start++;
+            end--;
+        } else {
+            return checkHuiWen(chars, start, end - 1) 
+            || checkHuiWen(chars, start + 1, end);
+        }
+    }
+    return true;
+}
+```
+
+# 栈
+
+## -20-有效的括号_简单
+
+
+```java
+public static boolean isValid(String s) {
+    Stack<Character> stack = new Stack<>();
+    char[] chars = s.toCharArray();
+    for (char i : chars) {
+        if (i == '(') {
+            // zz 压入 相反的
+            stack.add(')');
+        } else if (i == '{') {
+            // zz 压入 相反的
+            stack.add('}');
+        } else if (i == '[') {
+            // zz 压入 相反的
+            stack.add(']');
+        } else {
+            if (stack.isEmpty()) {
+                return false;
+            }
+            if (i != stack.pop()) {
+                return false;
+            }
+        }
+    }
+    return stack.isEmpty();
+}
+```
+
 
 
 
@@ -2468,7 +3558,9 @@ _680_验证回文字符串Ⅱ_简单
 
 # 贪心算法
 
+
 ## -55-跳跃游戏_中等
+
 
 ```java
 输入：nums = [2,3,1,1,4]
@@ -2486,17 +3578,72 @@ public boolean canJump(int[] nums) {
     return max_i >= nums.length - 1;
 }
 ```
+
+
 ## -45-跳跃游戏II_困难-过
-
-
-
-
-
-
 
 # 数学
 
+## -509-斐波那契数_简单
+
+```java
+F(0) = 0，F(1) = 1
+F(n) = F(n - 1) + F(n - 2)，其中 n > 1
+输入：4
+输出：3
+解释：F(4) = F(3) + F(2) = 2 + 1 = 3
+// 动态规划
+public int fib(int n) {
+    if (n == 0 || n == 1) {
+        return n;
+    }
+  // 状态容器
+    int[] dp = new int[n + 1];
+  // 初始化
+    dp[0] = 0;
+    dp[1] = 1;
+  // 状态方程
+    for (int i = 2; i < n + 1; i++) {
+        dp[i] = dp[i - 1] + dp[i - 2];
+    }
+    return dp[n];
+}  
+
+// 二次优化, 节省空间
+public int fib(int n) {
+    if (n == 0 || n == 1) {
+        return n;
+    }
+    int pre1 = 0;
+    int pre2 = 1;
+    int sum = 0;
+    for (int i = 2; i < n + 1; i++) {
+        sum = pre1 + pre2;
+        pre1 = pre2;
+        pre2 = sum;
+    }
+    return sum;
+}
+
+// 递归写法, 存在重复计算的问题
+public int fib(int n) {
+    if (n == 0 || n == 1) {
+        return n;
+    }
+    return fib(n - 1) + fib(n - 2);
+}
+
+
+
+```
+
+
+
+
+
+
 ## -136-只出现一次的数字_简单
+
 
 ```java
 异或 规律
@@ -2519,7 +3666,10 @@ public int singleNumber(int[] nums) {
     return result;
 }
 ```
+
+
 ## -260-只出现一次的数字 III_中等
+
 
 ```java
 给定一个整数数组 nums，其中恰好有两个元素只出现一次，其余所有元素均出现两次。 找出只出现一次的那两个元素。
@@ -2547,7 +3697,10 @@ public int[] singleNumber(int[] nums) {
     return res;
 }
 ```
+
+
 ## -137-只出现一次的数字II_中等
+
 
 ```java
 一个非空整数数组，除了某个元素只出现一次以外，其余每个元素均出现了三次。找出那个只出现了一次的元素
@@ -2581,12 +3734,15 @@ public int singleNumber(int[] arr) {
 
 ## -633-平方数之和_中等
 
+
 ```java
 给定一个非负整数 c ，你要判断是否存在两个整数 a 和 b，使得 a2 + b2 = c 。
 输入：c = 5
 输出：true
 解释：1 * 1 + 2 * 2 = 5
 ```
+
+
 ```java
 /**
  * 利用双指针判断是否存在,
@@ -2610,41 +3766,51 @@ public boolean judgeSquareSum(int c) {
 ```
 
 
-
-
-
 ## 判断一个正整数 是不是2的整数次幂
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100245.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100245.png#id=kvnll&originHeight=563&originWidth=916&originalType=binary&status=done&style=none)
 
 
-```plain
+```
 public function boolean isPowerOf2(int num) {
   return (num&(num-1)) == 0;
 }
 ```
 
+
 ## 删除K个数字后的最小值
+
 
 给出一个整数, 从该整数中去掉K个数组嘛要求剩下的数字形成的新整数尽可能小, 如何选取被去掉的数字?
 
-```plain
+
+```
 思路:
 把原整数的所有数字, 从左往右 进行比较, 若该位的数字 大于 其右边的数字, 那么删除该数字
 ```
+
+
 例如:
+
 
 541270936 , 删除1位
 
+
 数字5大于其右边的4, 所以删除5
+
 
 41270936, 删除1位
 
+
 数字4大于其右边的1, 所以删除4
+
 
 1270936, 删除1位
 
+
 数字7大于其右边的0, 所以删除7
+
 
 ```java
 public static String func(String num, int k) {
@@ -2664,9 +3830,12 @@ public static String func(String num, int k) {
         }
     }
     return newNum;
-} 
+}
 ```
+
+
 ## _大整数相加 (重点)
+
 
 ```java
 private static String jisuan(String str1, String str2) {
@@ -2700,7 +3869,10 @@ private static String jisuan(String str1, String str2) {
     return str.toString();
 }
 ```
+
+
 ## -1-两数之和 简单
+
 
 ```java
 给定 nums = [2, 7, 11, 15], target = 9
@@ -2722,7 +3894,39 @@ public int[] twoSum(int[] nums, int target) {
     throw new IllegalArgumentException("No two sum solution");
 }
 ```
+
+## -167-两数之和II_简单
+
+```java
+升序的有序数组
+输入：numbers = [2,7,11,15], target = 9
+输出：[1,2]
+解释：2 与 7 之和等于目标数 9 。因此 index1 = 1, index2 = 2 。
+public int[] twoSum(int[] arr, int target) {
+    int left = 0;
+    int right = arr.length - 1;
+    while (left < right) {
+        if (arr[left] + arr[right] == target) {
+            return new int[]{left, right};
+        } else if (arr[left] + arr[right] < target) {
+            left++;
+        } else {
+            right--;
+        }
+    }
+    //因为题目告诉我们一定有解，所以这里随便返回了
+    return new int[] { -1, -1 };
+}
+```
+
+
+
+
+
+
+
 ## -15-三数之和_中等
+
 
 ```java
 给你一个包含 n 个整数的数组 nums，判断 nums 中是否存在三个元素 a，b，c ，使得 a + b + c = 0 ？请你找出所有和为 0 且不重复的三元组。
@@ -2731,137 +3935,18 @@ public int[] twoSum(int[] nums, int target) {
 ```
 
 
-
-
-
-
-
 # 设计
+
 
 ## -146-LRU缓存机制_中等--双向链表
 
-```java
-public class LRUCache {
-    class Node {
-        int key;
-        int value;
-        Node prev;
-        Node next;
-        public Node() {
-        }
-        public Node(int _key, int _value) {
-            key = _key;
-            value = _value;
-        }
-    }
-    private Map<Integer, Node> cache = new HashMap<Integer, Node>();
-    private int size;
-    private int capacity;
-    private Node head, tail;
-    
-    public LRUCache(int capacity) {
-        this.size = 0;
-        this.capacity = capacity;
-        // 使用伪头部和伪尾部节点
-        head = new Node();
-        tail = new Node();
-        head.next = tail;
-        tail.prev = head;
-    }
-    
-    public int get(int key) {
-        Node node = cache.get(key);
-        if (node == null) {
-            return -1;
-        }
-        // 如果 key 存在，先通过哈希表定位，再移到头部
-        moveToHead(node);
-        return node.value;
-    }
-    
-    private void moveToHead(Node node) {
-        removeNode(node);
-        addToHead(node);
-    }
-    
-    private void removeNode(Node node) {
-        node.prev.next = node.next;
-        node.next.prev = node.prev;
-    }
-    
-    private void addToHead(Node node) {
-        node.prev = head;
-        node.next = head.next;
-        head.next.prev = node;
-        head.next = node;
-    }
-    
-    public void put(int key, int value) {
-        Node node = cache.get(key);
-        if (node == null) {
-            // 如果 key 不存在，创建一个新的节点
-            Node newNode = new Node(key, value);
-            // 添加进哈希表
-            cache.put(key, newNode);
-            // 添加至双向链表的头部
-            addToHead(newNode);
-            ++size;
-            if (size > capacity) {
-                // 如果超出容量，删除双向链表的尾部节点
-                Node tail = removeTail();
-                // 删除哈希表中对应的项
-                cache.remove(tail.key);
-                --size;
-            }
-        } else {
-            // 如果 key 存在，先通过哈希表定位，再修改 value，并移到头部
-            node.value = value;
-            moveToHead(node);
-        }
-    }
-    
-    private Node removeTail() {
-        Node res = tail.prev;
-        removeNode(res);
-        return res;
-    }
-}
-```
-## _460_LFU 缓存_困难
 
+## _-460-LFU缓存__困难
 
 
 # 其他
-
-## -20-有效的括号_简单
-
-```java
-public static boolean isValid(String s) {
-    Stack<Character> stack = new Stack<>();
-    char[] chars = s.toCharArray();
-    for (char i : chars) {
-        if (i == '(') {
-            // zz 压入 相反的
-            stack.add(')');
-        } else if (i == '{') {
-            // zz 压入 相反的
-            stack.add('}');
-        } else if (i == '[') {
-            // zz 压入 相反的
-            stack.add(']');
-        } else {
-            if (stack.isEmpty()) {
-                return false;
-            }
-            if (i != stack.pop()) {
-                return false;
-            }
-        }
-    }
-    return stack.isEmpty();
-}
-```
 ## 实现两个线程交替输出奇偶数
+
 
 ```java
 // 无需判断数字是否是奇偶数，两个线程通过等待唤醒机制，交替打印数字。 
@@ -2888,7 +3973,10 @@ static class TurningRunner implements Runnable {
     }
 }
 ```
+
+
 ## _生产者消费者模型
+
 
 ```java
 public class Storage {
@@ -2961,39 +4049,50 @@ public class Main {
 }
 ```
 
+
 ## _顺序打印ABC
+
 
 ## 赛马问题
 
-```plain
+
+```
 有一个赛场上共有25匹马，赛场有5个跑道，不使用计时器进行比赛（也就是每次比赛只能得到本次的比赛的顺序）
 试问最少比多少场才能选出最快的三匹马？并给出分析过程！
 1. 先跑5次：首先我们把25匹马分成5组（A、B、C、D、E），跑上五次，得到每组的第一名
 2. 第6次跑：让这5个第一名跑上一次，得到其中的前三名。注意：这里就可以得到所有马中跑的最快的第一名A1了。并且，D1和E1所在的组可以直接淘汰。第二名和第三名一定不会在其中产生！
 3. 第7次跑：因为我们已经跑出了第一名，所以A1不需要再参加比赛，同时，D1和E1所在的组已经淘汰。C1作为第三组的第一名，C组不会有跑的比C1快的。而B2有可能是比C1跑的快的第三名。同理，A2和A3也有可能是比B1和B2跑的快的。所以第7次比赛，我们让A2，A3，B1，B2，C1来一起完成。
 ```
+
+
 跑5次, 回去 5个第一名
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100311.png)
 
-第6次跑, 让5个第一名跑,  的出第一名
+![](https://youpaiyun.zongqilive.cn/image/20210514100311.png#id=G0yGf&originHeight=547&originWidth=471&originalType=binary&status=done&style=none)
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100317.png)
+
+第6次跑, 让5个第一名跑,  的出第一名
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100317.png#id=oWMo7&originHeight=132&originWidth=461&originalType=binary&status=done&style=none)
+
 
 第七次跑
 
-![](https://youpaiyun.zongqilive.cn/image/20210514100328.png)
 
-
-
+![](https://youpaiyun.zongqilive.cn/image/20210514100328.png#id=MSA4U&originHeight=559&originWidth=476&originalType=binary&status=done&style=none)
 
 
 Top k 的问题
 
+
 ## 海量大数据处理相关
 
-```plain
+
+```
 分而治之/hash映射 + hash统计 + 堆/快速/归并排序；
 ```
-![](https://youpaiyun.zongqilive.cn/image/20210514100338.png)
+
+
+![](https://youpaiyun.zongqilive.cn/image/20210514100338.png#id=iuXPk&originHeight=693&originWidth=1014&originalType=binary&status=done&style=none)
 
