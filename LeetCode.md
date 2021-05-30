@@ -3551,7 +3551,10 @@ public static boolean isValid(String s) {
 }
 ```
 
+## -232-用栈实现队列_简单
 
+```java
+```
 
 
 
