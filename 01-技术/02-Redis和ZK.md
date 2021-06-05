@@ -24,9 +24,9 @@ Redis使用单个线程处理请求，避免了多个线程之间线程切换和
 # Redis的客户端
 ## Lettuce(spring默认)
 jedis
-![image.png](https://cdn.nlark.com/yuque/0/2021/png/1011530/1622094583164-ac5ddbf2-d4de-4006-a024-5b7f03ec0a9a.png#clientId=u9f942205-fb09-4&from=paste&height=109&id=ucda65eb6&margin=%5Bobject%20Object%5D&name=image.png&originHeight=142&originWidth=1170&originalType=binary&size=41833&status=done&style=none&taskId=u48c4d03f-807d-4b8a-8405-bbbe5fbb59a&width=898)
+![](https://youpaiyun.zongqilive.cn/image/image (1).png)
 Jedis 管理连接池
-​
+
 
 redis main函数执行流程
 ​
@@ -104,9 +104,58 @@ HLL比 bitmap更节省内存，但有一定误差( 标准误差 0.81%)
 
 
 ### Streams(忽略)
-#### 
+
+
+
+
+#BitMap 
+
 # 布隆过滤器
-一个不怎么精确的 set 结构，当你使用它的 contains 方法判断某个对象是否存在时，它可能会误判。当布隆过滤器说某个值存在时，这个值可能不存在；当它说不存在时，那就肯定不存在。
+它可能会误判。当布隆过滤器说某个值存在时，这个值可能不存在；当它说不存在时，那就肯定不存在。
+
+优点:
+
+- 是由一串二进制数组组成的数据, 占用空间小
+
+- 查询速度快, 根据位置下标获取数据, O(K), K-表示哈希函数的个数
+
+缺点:
+
+- 删除不友好, 可能存在误删
+
+- 误判,( 不同数据的hash值可能是相同的, ), 只能减少误判的概率
+
+如何减少误判的概率?
+
+- 不能设置的非常小, 根据业务情况
+
+- Hash函数的个数
+
+- 误差率越小, 占用的空间越大, 需要的Hash函数越多 
+
+![](https://youpaiyun.zongqilive.cn/image/20210601192728.png)
+
+查询过程:
+
+-  算出 "你好" 的下标位置, 如 (3, 5,7) 这三这位置;
+
+- 位置上的数据 必须都是1 , 就存在, 否则 不存在
+
+删除数据
+
+很难做删除操作, 会造成数据的误删
+
+![](https://youpaiyun.zongqilive.cn/image/20210601192822.png)
+
+例如: "你好"和"hello" 在同一位置, 无法选择性的删除其中一个
+
+# 布谷鸟过滤器
+
+鸠占鹊巢 , 把挤走的元素找新的位置
+
+挤兑循环问题
+
+
 
 
 # Redis 的过期策略

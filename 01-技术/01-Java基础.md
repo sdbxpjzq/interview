@@ -6,6 +6,10 @@ https://blog.csdn.net/weixin_43314519/article/details/112603595?ops_request_misc
 
 
 
+
+
+
+
 # JVM
 
 
@@ -274,7 +278,208 @@ e=next ----> e=null
 
 
 
+# 锁
+
+## 独占锁和共享锁
+
+独占锁模式下，每次只能有一个线程能持有锁，ReentrantLock就是以独占方式实现的互斥锁.
+
+独占锁是一种悲观保守的加锁策略，它避免了读/读冲突，如果某个只读线程获取锁，则其他读线程都只能等待，这种情况下就限制了不必要的并发性，因为读操作并不会影响数据的一致性
+
+
+
+共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock
+
+共享锁则是一种乐观锁，它放宽了加锁策略，允许多个执行读操作的线程同时访问共享资源。 java的并发包中提供了ReadWriteLock，读-写锁。它允许一个资源可以被多个读操作访问，或者被一个 写操作访问，但两者不能同时进行。
+
+
+
+## 可重入锁
+
+
+
+## 锁的公平与非公平
+
+锁的公平与非公平，是指线程请求获取锁的过程中，是否允许插队。
+
+在公平锁上，线程将按他们发出请求的顺序来获得锁；
+
+非公平锁则允许在线程发出请求后立即尝试获取锁，如果可用则可直接获取锁，尝试失败才进行排队等待。
+
+
+
+# synchronized
+
+https://juejin.cn/post/6968999143964573703?utm_source=gold_browser_extension
+
+
+
 ## Lock和synchronized区别
+
+
+
+# AQS
+
+参考:
+
+https://segmentfault.com/a/1190000015739343
+
+https://segmentfault.com/a/1190000015752512
+
+三个关键点: 状态, 队列, CAS
+
+## 状态
+
+```java
+private volatile int state; 
+```
+
+该属性的值即表示了锁的状态，state为0表示锁没有被占用，state大于0表示当前已经有线程持有该锁，
+
+这里之所以说大于0而不说等于1是因为可能存在可重入的情况。你可以把state变量当做是当前持有该锁的线程数量。
+
+```java
+private transient Thread exclusiveOwnerThread; //继承自AbstractOwnableSynchronizer
+```
+
+`exclusiveOwnerThread`属性的值即为当前持有锁的线程，
+
+## 队列
+
+### 队列中的节点
+
+```java
+// 节点所代表的线程
+volatile Thread thread;
+
+// 双向链表，每个节点需要保存自己的前驱节点和后继节点的引用
+volatile Node prev;
+volatile Node next;
+
+// 线程所处的等待锁的状态，初始化时，该值为0
+volatile int waitStatus;
+
+/** 因为超时或者中断，节点会被设置成取消状态，被取消的节点不会参与到竞争中，会一直是取消
+            状态不会改变 */
+static final int CANCELLED =  1;
+/** 后继节点处于等待状态，如果当前节点释放了同步状态或者被取消，会通知后继节点，使其得以
+            运行 */
+static final int SIGNAL    = -1;
+/** 节点在等待条件队列中，节点线程等待在condition上，当其他线程对condition调用了signal
+            后，该节点将会从等待队列中进入同步队列中，获取同步状态 */
+static final int CONDITION = -2;
+/***
+下一次共享式同步状态获取会无条件的传播下去
+         */
+static final int PROPAGATE = -3;
+
+// 该属性用于条件队列或者共享锁
+Node nextWaiter;
+```
+
+`waitStatus`在独占锁模式下，我们只需要关注`CANCELLED` ,`SIGNAL`两种状态即可。
+
+CANCELLED:
+
+表示Node所代表的当前线程已经取消了排队，即放弃获取锁了。
+
+
+
+SIGNAL:
+
+它不是表征当前节点的状态，而是当前节点的下一个节点的状态。
+
+后继结点入队时，会将前继结点的状态更新为SIGNAL, 
+
+当一个节点的waitStatus被置为SIGNAL，就说明它的下一个节点（即它的后继节点）已经被挂起了（或者马上就要被挂起了），因此在当前节点释放了锁或者放弃获取锁时，如果它的waitStatus属性为SIGNAL，它还要完成一个额外的操作——唤醒它的后继节点。
+
+
+
+### 双向链表队列
+
+```java
+// 头结点，不代表任何线程，是一个哑结点
+private transient volatile Node head;
+
+// 尾节点，每一个请求锁的线程会加到队尾
+private transient volatile Node tail;
+```
+
+head节点不代表任何线程，它就是一个空节点！
+
+![](https://youpaiyun.zongqilive.cn/image/20210530180228.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210530180252.png)
+
+#### 尾分叉
+
+将一个节点node添加到队列的末尾需要三步:
+
+1. 设置node的前驱节点为当前的尾节点：`node.prev = t`
+2. 修改`tail`属性，使它指向当前节点
+3. 修改原来的尾节点，使它的next指向当前节点
+
+```java
+// 到这里说明队列已经不是空的了, 这个时候再继续尝试将节点加到队尾
+    node.prev = t;
+    if (compareAndSetTail(t, node)) {
+        t.next = node;
+        return t;
+    }
+```
+
+![](https://youpaiyun.zongqilive.cn/image/20210530201347.png)
+
+这里的三步并不是一个原子操作，第一步很容易成功；
+
+而第二步由于是一个CAS操作，在并发条件下有可能失败，第三步只有在第二步成功的条件下才执行。
+
+这里的CAS保证了同一时刻只有一个节点能成为尾节点，其他节点将失败，失败后将回到for循环中继续重试。
+
+所以，当有大量的线程在同时入队的时候，同一时刻，只有一个线程能完整地完成这三步，**而其他线程只能完成第一步**，于是就出现了尾分叉：
+
+![](https://youpaiyun.zongqilive.cn/image/20210530201506.png)
+
+注意，这里第三步是在第二步执行成功后才执行的，这就意味着，有可能即使我们已经完成了第二步，将新的节点设置成了尾节点，**此时原来旧的尾节点的next值可能还是`null`**(因为还没有来的及执行第三步)，所以如果此时有线程恰巧从头节点开始向后遍历整个链表，则它是遍历不到新加进来的尾节点的，但是这显然是不合理的，因为现在的tail已经指向了新的尾节点。
+
+所以如果我们从尾节点开始向前遍历，已经可以遍历到所有的节点。
+
+这也就是为什么我们在AQS相关的源码中，有时候常常会出现从尾节点开始逆向遍历链表——因为一个节点要能入队，则它的prev属性一定是有值的，但是它的next属性可能暂时还没有值。
+
+至于那些“分叉”的入队失败的其他节点，在下一轮的循环中，它们的prev属性会重新指向新的尾节点，继续尝试新的CAS操作，最终，所有节点都会通过自旋不断的尝试入队，直到成功为止
+
+
+
+
+
+
+
+#### CAS操作
+
+- AQS的3个属性state,head和tail
+- Node对象的2个属性waitStatus,next
+
+
+
+#### 获取锁的流程图(自己重新画)
+
+![](https://youpaiyun.zongqilive.cn/image/20210530200846.png)
+
+
+
+### CAS
+
+CAS操作保证了同一个时刻，只有一个线程能修改成功，从而保证了线程安全
+
+CAS采用的是乐观锁的思想，因此常常伴随着自旋，如果发现当前无法成功地执行CAS，则不断重试，直到成功为止，自旋的的表现形式通常是一个死循环for(;;)
+
+
+
+
+
+
+
+
 
 
 
