@@ -314,54 +314,29 @@ https://segmentfault.com/a/1190000015752512
 
 ## 独占锁
 
-独占锁模式下，每次只能有一个线程能持有锁，ReentrantLock就是以独占方式实现的互斥锁.
-
-独占锁是一种悲观保守的加锁策略，它避免了读/读冲突，如果某个只读线程获取锁，则其他读线程都只能等待，这种情况下就限制了不必要的并发性，因为读操作并不会影响数据的一致性
-
 ==独占锁的节点释放锁时，才会唤醒后继节点==
 
+>  获取独占锁，对中断不敏感。 
+>
+>  首先尝试获取一次锁，如果成功，则返回；
+>
+> 否则会把当前线程包装成Node插入到队列中，在队列中会检测是否为head的直接后继，并尝试获取锁,  如果获取失败，则会通过LockSupport阻塞当前线程，直至被释放锁的线程唤醒或者被中断，随后再次尝试获取锁，如此反复。 
 
-
-
-
-
-
-## 共享锁
-
-共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock
-
-共享锁则是一种乐观锁，它放宽了加锁策略，允许多个执行读操作的线程同时访问共享资源。 java的并发包中提供了ReadWriteLock，读-写锁。它允许一个资源可以被多个读操作访问，或者被一个 写操作访问，但两者不能同时进行。
-
-==在共享锁模式下，在获取锁和释放锁结束时，都会唤醒后继节点。==
-
-
-
-
-
-
-
-三个关键点: 状态, 队列, CAS
-
-## 状态
+### 状态
 
 ```java
-private volatile int state; 
+// state为0表示锁没有被占用，
+// state大于0表示当前已经有线程持有该锁
+private volatile int state;
+// 当前持有锁的线程
+private transient Thread exclusiveOwnerThread;
 ```
 
-该属性的值即表示了锁的状态，state为0表示锁没有被占用，state大于0表示当前已经有线程持有该锁，
 
-这里之所以说大于0而不说等于1是因为可能存在可重入的情况。你可以把state变量当做是当前持有该锁的线程数量。
 
-```java
-// 用来记录当前持有锁的线程(独占锁)
-private transient Thread exclusiveOwnerThread; //继承自AbstractOwnableSynchronizer
-```
+### 双向链表队列
 
-`exclusiveOwnerThread`属性的值即为当前持有锁的线程，
-
-## 队列
-
-### 队列中的节点
+#### 节点定义
 
 ```java
 // 节点所代表的线程
@@ -392,15 +367,15 @@ static final int PROPAGATE = -3;
 Node nextWaiter;
 ```
 
-`waitStatus`在独占锁模式下，我们只需要关注`CANCELLED` ,`SIGNAL`两种状态即可。
+#### waitStatus
 
-CANCELLED:
+`waitStatus`在独占锁模式下，我们只需要关注`CANCELLED` ,`SIGNAL`两种状态即可,默认值是0
+
+CANCELLED(1):
 
 表示Node所代表的当前线程已经取消了排队，即放弃获取锁了。
 
-
-
-SIGNAL:
+SIGNAL(-1):
 
 它不是表征当前节点的状态，而是当前节点的下一个节点的状态。
 
@@ -408,9 +383,7 @@ SIGNAL:
 
 当一个节点的waitStatus被置为SIGNAL，就说明它的下一个节点（即它的后继节点）已经被挂起了（或者马上就要被挂起了），因此在当前节点释放了锁或者放弃获取锁时，如果它的waitStatus属性为SIGNAL，它还要完成一个额外的操作——唤醒它的后继节点。
 
-
-
-### 双向链表队列
+#### 头节点和尾节点
 
 ```java
 // 头结点，不代表任何线程，是一个哑结点
@@ -436,11 +409,11 @@ head节点不代表任何线程，它就是一个空节点！
 
 ```java
 // 到这里说明队列已经不是空的了, 这个时候再继续尝试将节点加到队尾
-    node.prev = t;
-    if (compareAndSetTail(t, node)) {
-        t.next = node;
-        return t;
-    }
+node.prev = t;
+if (compareAndSetTail(t, node)) {
+  t.next = node;
+  return t;
+}
 ```
 
 ![](https://youpaiyun.zongqilive.cn/image/20210530201347.png)
@@ -459,40 +432,331 @@ head节点不代表任何线程，它就是一个空节点！
 
 所以如果我们从尾节点开始向前遍历，已经可以遍历到所有的节点。
 
-这也就是为什么我们在AQS相关的源码中，有时候常常会出现从尾节点开始逆向遍历链表——因为一个节点要能入队，则它的prev属性一定是有值的，但是它的next属性可能暂时还没有值。
+这也就是为什么我们在AQS相关的源码中，有时候常常会出现==从尾节点开始逆向遍历链表==——因为一个节点要能入队，则它的prev属性一定是有值的，但是它的next属性可能暂时还没有值。
 
 至于那些“分叉”的入队失败的其他节点，在下一轮的循环中，它们的prev属性会重新指向新的尾节点，继续尝试新的CAS操作，最终，所有节点都会通过自旋不断的尝试入队，直到成功为止
 
-
-
-#### 锁释放
-
-在独占锁模式下，由于头节点就是持有独占锁的节点，在它释放独占锁后，如果发现自己的waitStatus不为0，则它将负责唤醒它的后继节点。
-
-
-
-#### CAS操作
+### CAS操作
 
 - AQS的3个属性state,head和tail
 - Node对象的2个属性waitStatus,next
 
 
 
-#### 获取锁的流程图(自己重新画)
+### 加锁流程
 
-![](https://youpaiyun.zongqilive.cn/image/20210530200846.png)
+加锁:
+
+```java
+public final void acquire(int arg) {
+  // 1. 获取锁(也就是改变state的值)
+  // 2. 做队列的一些事情
+  if (!tryAcquire(arg) &&
+      acquireQueued(addWaiter(Node.EXCLUSIVE), arg))
+     //并不知道线程被唤醒的原因, 如果发现当前线程曾经被中断过，那我们就把当前线程再中断一次
+    // 线程在等待资源的过程中被中断唤醒，它还是会不依不饶的再抢锁，直到它抢到锁为止。也就是说，它是不响应这个中断的，仅仅是记录下自己被人中断过
+    selfInterrupt();
+}
+```
+
+```java
+// 1. 修改state的值
+protected final boolean tryAcquire(int acquires) {
+  final Thread current = Thread.currentThread();
+   // 首先获取当前锁的状态
+  int c = getState();
+  if (c == 0) {
+    // 当前非公平锁, acquires =1
+    // 利用CAS 改变状态
+    if (compareAndSetState(0, acquires)) {
+      // 获取锁, 设置当前线程
+      setExclusiveOwnerThread(current);
+      return true;
+    }
+  }
+  else if (current == getExclusiveOwnerThread()) {
+    // 重入锁
+    // state+1
+    int nextc = c + acquires;
+    if (nextc < 0) // overflow
+      throw new Error("Maximum lock count exceeded");
+    setState(nextc);
+    return true;
+  }
+  return false;
+}
+```
+
+```java
+// 2.队列的一些操作
+private Node addWaiter(Node mode) {
+  // mode值为Node.EXCLUSIVE，所以节点的nextWaiter属性被设为null
+  // 每一个处于独占锁模式下的节点，它的nextWaiter一定是null。
+  Node node = new Node(Thread.currentThread(), mode);
+  // Try the fast path of enq; backup to full enq on failure
+  Node pred = tail;
+  // 如果队列不为空
+  if (pred != null) {
+    // 节点入队3步走, 就会出现尾分叉现象, (唤醒线程时需要逆序遍历队列)
+    node.prev = pred;
+    // 放在下面if的里面，会导致一个瞬间tail.prev = null，这样会使得队列不完整。
+    // 用CAS方式将当前节点设为尾节点
+    if (compareAndSetTail(pred, node)) {
+      pred.next = node;
+      return node;
+    }
+  }
+  // 代码会执行到这里, 只有两种情况:
+  //    1. 队列为空
+  //    2. CAS失败
+  // 注意, 这里是并发条件下, 所以什么都有可能发生, 尤其注意CAS失败后也会来到这里
+  enq(node); //将节点插入队列
+  return node;
+}
+
+
+private Node enq(final Node node) {
+  // 通过自旋+CAS的方式，确保当前节点入队。
+  for (;;) {
+    Node t = tail;
+    if (t == null) {
+      // 队列为空, 进行初始化
+      // 队列不是在构造的时候初始化的, 而是延迟到需要用的时候再初始化, 以提升性能
+      // 注意，初始化时使用new Node()方法新建了一个dummy节点
+      if (compareAndSetHead(new Node()))
+        tail = head;
+    } else {
+      // 队列不为空, 这个时候利用CAS将节点加到队尾
+      // 节点入队3步走, 就会出现尾分叉现象, (唤醒线程时需要逆序遍历队列)
+      node.prev = t;
+      // 放在下面if的里面，会导致一个瞬间tail.prev = null，这样会使得队列不完整。
+      // 用CAS方式将当前节点设为尾节点
+      if (compareAndSetTail(t, node)) {
+        t.next = node;
+        return t;
+      }
+    }
+  }
+}
+```
 
 
 
-### CAS
+```java
+//(1) 能执行到该方法, 说明addWaiter 方法已经成功将包装了当前Thread的节点添加到了等待队列的队尾
+//(2) 该方法中将再次尝试去获取锁
+//(3) 在再次尝试获取锁失败后, 判断是否需要把当前线程挂起
 
-CAS操作保证了同一个时刻，只有一个线程能修改成功，从而保证了线程安全
+// 在队列中的节点通过此方法获取锁，对中断不敏感。
+final boolean acquireQueued(final Node node, int arg) {
+  boolean failed = true;
+  try {
+    boolean interrupted = false;
+    for (;;) {
+      final Node p = node.predecessor();
+      // 检测当前节点前驱是否head，这是试获取锁的资格。
+      // 如果是的话，则调用tryAcquire尝试获取锁,
+      // 成功，则将head置为当前节点。
+      if (p == head && tryAcquire(arg)) {
+        // 将当前节点, 变成了新的head节点
+        // 某种程度上就是将当前线程从等待队列里面拿出来了，是一个变相的出队操作。
+        setHead(node);
+        /**
+        private void setHead(Node node) {
+    						head = node;
+    						node.thread = null;
+   							node.prev = null;
+				}
+        **/
+        p.next = null; // help GC
+        failed = false;
+        return interrupted;
+      }
+      // 获取锁失败, 则根据前驱节点判断是否要将当前线程挂起
+      if (shouldParkAfterFailedAcquire(p, node) &&
+          parkAndCheckInterrupt())
+        // 唤醒之后若是中断状态, 仍然需要去获取锁
+        interrupted = true;
+    }
+  } finally {
+    if (failed)
+      cancelAcquire(node);
+  }
+}
 
-CAS采用的是乐观锁的思想，因此常常伴随着自旋，如果发现当前无法成功地执行CAS，则不断重试，直到成功为止，自旋的的表现形式通常是一个死循环for(;;)
+static final int CANCELLED =  1;
+static final int SIGNAL    = -1;
+static final int CONDITION = -2;
+static final int PROPAGATE = -3;
+// 根据前驱节点中的waitStatus值来判断是否需要阻塞当前线程。
+private static boolean shouldParkAfterFailedAcquire(Node pred, Node node) {
+  int ws = pred.waitStatus;
+  if (ws == Node.SIGNAL)
+    // 前驱节点 是SIGNAL状态，在释放锁的时候会唤醒后继节点，
+    // 所以后继节点（也就是当前节点）现在可以阻塞自己。
+    return true;
+  if (ws > 0) {
+    // 前驱节点状态为取消,向前遍历
+    // 当前线程会之后会再次回到循环并尝试获取锁
+    do {
+      node.prev = pred = pred.prev;
+    } while (pred.waitStatus > 0);
+    pred.next = node;
+  } else {
+    // 前驱节点的状态既不是SIGNAL，也不是CANCELLED
+    // 用CAS设置前驱节点的ws为 Node.SIGNAL，给自己定一个闹钟
+    // 并且之后会回到循环再次重试获取锁。
+    compareAndSetWaitStatus(pred, ws, Node.SIGNAL);
+  }
+  return false;
+}
+
+// 挂起线程
+private final boolean parkAndCheckInterrupt() {
+  LockSupport.park(this);// 线程被挂起，停在这里不再往下执行了
+  return Thread.interrupted(); // 返回线程的中断状态
+}
+```
 
 
 
 
+
+
+
+![](https://youpaiyun.zongqilive.cn/image/AQS1.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210606162933.png)
+
+
+
+
+
+### 锁释放流程
+
+```java
+// 在成功释放锁之后,唤醒后继节点只是一个"附加操作",无论该操作结果怎样,最后release操作都会返回true
+public final boolean release(int arg) {
+  if (tryRelease(arg)) {
+    /*
+         * 此时的head节点可能有3种情况:
+         * 1. null (AQS的head延迟初始化+无竞争的情况)
+         * 2. 当前线程在获取锁时new出来的节点通过setHead设置的
+         * 3. 由于通过tryRelease已经完全释放掉了独占锁，有新的节点在acquireQueued中获取到了独占锁，并设置了head
+
+         * 第三种情况可以再分为两种情况：
+         * （一）时刻1:线程A通过acquireQueued，持锁成功，set了head
+         *          时刻2:线程B通过tryAcquire试图获取独占锁失败失败，进入acquiredQueued
+         *          时刻3:线程A通过tryRelease释放了独占锁
+         *          时刻4:线程B通过acquireQueued中的tryAcquire获取到了独占锁并调用setHead
+         *          时刻5:线程A读到了此时的head实际上是线程B对应的node
+         * （二）时刻1:线程A通过tryAcquire直接持锁成功，head为null
+         *          时刻2:线程B通过tryAcquire试图获取独占锁失败失败，入队过程中初始化了head，进入acquiredQueued
+         *          时刻3:线程A通过tryRelease释放了独占锁，此时线程B还未开始tryAcquire
+         *          时刻4:线程A读到了此时的head实际上是线程B初始化出来的傀儡head
+         */
+    Node h = head;
+    // head节点状态不会是CANCELLED，所以这里h.waitStatus != 0相当于h.waitStatus < 0
+    if (h != null && h.waitStatus != 0)
+      // 唤醒后继线程
+      unparkSuccessor(h);
+    return true;
+  }
+  return false;
+}
+```
+
+
+
+```java
+// 释放锁
+protected final boolean tryRelease(int releases) {
+  // 首先将当前持有锁的线程个数减1(回溯到调用源头sync.release(1)可知, releases的值为1)
+  // 这里的操作主要是针对可重入锁的情况下, c可能大于1
+  int c = getState() - releases; 
+
+  // 释放锁的线程当前必须是持有锁的线程
+  if (Thread.currentThread() != getExclusiveOwnerThread())
+    throw new IllegalMonitorStateException();
+
+  // 如果c为0了, 说明锁已经完全释放了
+  boolean free = false;
+  if (c == 0) {
+    free = true;
+    setExclusiveOwnerThread(null);
+  }
+  setState(c);
+  return free;
+}
+
+// 唤醒后继节点
+private void unparkSuccessor(Node node) {
+  int ws = node.waitStatus;
+  // 如果head节点的ws比0小, 则直接将它设为0
+  if (ws < 0)
+    compareAndSetWaitStatus(node, ws, 0);
+
+  // 要唤醒的节点就是自己的后继节点
+  // 如果后继节点存在且也在等待锁, 那就直接唤醒它
+  Node s = node.next;
+  if (s == null || s.waitStatus > 0) {
+    // 1.后继节点不存在
+    // 2.后继节点取消等待锁
+    s = null;
+    // 此时从尾节点开始向前找起, 直到找到距离head节点最近的ws<=0的节点
+    for (Node t = tail; t != null && t != node; t = t.prev)
+      /**
+      为什么从tail向前遍历??? 尾分叉现场
+      
+      node.prev = pred; //step 1, 设置前驱节点
+        if (compareAndSetTail(pred, node)) { // step2, 将当前节点设置成新的尾节点
+            pred.next = node; // step 3, 将前驱节点的next属性指向自己
+            return node;
+        }
+
+      如果读到s == null，不代表node就为tail。
+      考虑如下场景：
+      1.node某时刻为tail
+      2.有新线程通过addWaiter中的if分支或者enq方法添加自己
+      3.compareAndSetTail成功
+      4.此时这里的Node s = node.next读出来s == null，但事实上node已经不是tail，它有后继了!
+      **/
+      if (t.waitStatus <= 0)
+        s = t; // 注意! 这里找到了之并没有停止, 而是继续向前找
+  }
+  // 如果找到了还在等待锁的节点,则唤醒它
+  if (s != null)
+    LockSupport.unpark(s.thread);
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 共享锁
+
+共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock
+
+共享锁则是一种乐观锁，它放宽了加锁策略，允许多个执行读操作的线程同时访问共享资源。 java的并发包中提供了ReadWriteLock，读-写锁。它允许一个资源可以被多个读操作访问，或者被一个 写操作访问，但两者不能同时进行。
+
+==在共享锁模式下，在获取锁和释放锁结束时，都会唤醒后继节点。==
 
 
 
