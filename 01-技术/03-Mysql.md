@@ -1,6 +1,7 @@
 ```
 https://mp.weixin.qq.com/mp/homepage?__biz=Mzg3MzU2Njk3MA==&hid=1&sn=5e482808164cff0f8e9ae8de486d3dd6&scene=1&devicetype=iOS14.2&version=1800062e&lang=zh_CN&nettype=WIFI&ascene=7&session_us=gh_d355cc0acb3e&fontScale=109&wx_header=1
 
+https://juejin.cn/post/6973617121347682334?utm_source=gold_browser_extension
 
 ```
 
@@ -106,6 +107,10 @@ https://juejin.cn/post/6969120307814596645?utm_source=gold_browser_extension
 ### optimizer trace
 
 
+
+# sql优化
+
+https://juejin.cn/post/6973671172810637343?utm_source=gold_browser_extension#heading-5
 
 
 

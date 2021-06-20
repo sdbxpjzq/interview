@@ -278,7 +278,7 @@ e=next ----> e=null
 
 
 
-# 锁
+
 
 ## 可重入锁
 
@@ -291,14 +291,6 @@ e=next ----> e=null
 在公平锁上，线程将按他们发出请求的顺序来获得锁；
 
 非公平锁则允许在线程发出请求后立即尝试获取锁，如果可用则可直接获取锁，尝试失败才进行排队等待。
-
-
-
-# synchronized
-
-https://juejin.cn/post/6968999143964573703?utm_source=gold_browser_extension
-
-
 
 ## Lock和synchronized区别
 
@@ -399,51 +391,9 @@ head节点不代表任何线程，它就是一个空节点！
 
 ![](https://youpaiyun.zongqilive.cn/image/20210530180252.png)
 
-#### 尾分叉
-
-将一个节点node添加到队列的末尾需要三步:
-
-1. 设置node的前驱节点为当前的尾节点：`node.prev = t`
-2. 修改`tail`属性，使它指向当前节点
-3. 修改原来的尾节点，使它的next指向当前节点
-
-```java
-// 到这里说明队列已经不是空的了, 这个时候再继续尝试将节点加到队尾
-node.prev = t;
-if (compareAndSetTail(t, node)) {
-  t.next = node;
-  return t;
-}
-```
-
-![](https://youpaiyun.zongqilive.cn/image/20210530201347.png)
-
-这里的三步并不是一个原子操作，第一步很容易成功；
-
-而第二步由于是一个CAS操作，在并发条件下有可能失败，第三步只有在第二步成功的条件下才执行。
-
-这里的CAS保证了同一时刻只有一个节点能成为尾节点，其他节点将失败，失败后将回到for循环中继续重试。
-
-所以，当有大量的线程在同时入队的时候，同一时刻，只有一个线程能完整地完成这三步，**而其他线程只能完成第一步**，于是就出现了尾分叉：
-
-![](https://youpaiyun.zongqilive.cn/image/20210530201506.png)
-
-注意，这里第三步是在第二步执行成功后才执行的，这就意味着，有可能即使我们已经完成了第二步，将新的节点设置成了尾节点，**此时原来旧的尾节点的next值可能还是`null`**(因为还没有来的及执行第三步)，所以如果此时有线程恰巧从头节点开始向后遍历整个链表，则它是遍历不到新加进来的尾节点的，但是这显然是不合理的，因为现在的tail已经指向了新的尾节点。
-
-所以如果我们从尾节点开始向前遍历，已经可以遍历到所有的节点。
-
-这也就是为什么我们在AQS相关的源码中，有时候常常会出现==从尾节点开始逆向遍历链表==——因为一个节点要能入队，则它的prev属性一定是有值的，但是它的next属性可能暂时还没有值。
-
-至于那些“分叉”的入队失败的其他节点，在下一轮的循环中，它们的prev属性会重新指向新的尾节点，继续尝试新的CAS操作，最终，所有节点都会通过自旋不断的尝试入队，直到成功为止
-
-### CAS操作
-
-- AQS的3个属性state,head和tail
-- Node对象的2个属性waitStatus,next
 
 
-
-### 加锁流程
+### 加锁流程源码分析
 
 加锁:
 
@@ -560,6 +510,7 @@ final boolean acquireQueued(final Node node, int arg) {
       if (p == head && tryAcquire(arg)) {
         // 将当前节点, 变成了新的head节点
         // 某种程度上就是将当前线程从等待队列里面拿出来了，是一个变相的出队操作。
+        // 某种意义上, 头节点就是持有独占锁的节点，
         setHead(node);
         /**
         private void setHead(Node node) {
@@ -618,11 +569,49 @@ private final boolean parkAndCheckInterrupt() {
 }
 ```
 
+### 尾分叉
 
+将一个节点node添加到队列的末尾需要三步:
 
+1. 设置node的前驱节点为当前的尾节点：`node.prev = t`
+2. 修改`tail`属性，使它指向当前节点
+3. 修改原来的尾节点，使它的next指向当前节点
 
+```java
+// 到这里说明队列已经不是空的了, 这个时候再继续尝试将节点加到队尾
+node.prev = t;
+if (compareAndSetTail(t, node)) {
+  t.next = node;
+  return t;
+}
+```
 
+![](https://youpaiyun.zongqilive.cn/image/20210530201347.png)
 
+这里的三步并不是一个原子操作，第一步很容易成功；
+
+而第二步由于是一个CAS操作，在并发条件下有可能失败，第三步只有在第二步成功的条件下才执行。
+
+这里的CAS保证了同一时刻只有一个节点能成为尾节点，其他节点将失败，失败后将回到for循环中继续重试。
+
+所以，当有大量的线程在同时入队的时候，同一时刻，只有一个线程能完整地完成这三步，**而其他线程只能完成第一步**，于是就出现了尾分叉：
+
+![](https://youpaiyun.zongqilive.cn/image/20210530201506.png)
+
+注意，这里第三步是在第二步执行成功后才执行的，这就意味着，有可能即使我们已经完成了第二步，将新的节点设置成了尾节点，**此时原来旧的尾节点的next值可能还是`null`**(因为还没有来的及执行第三步)，所以如果此时有线程恰巧从头节点开始向后遍历整个链表，则它是遍历不到新加进来的尾节点的，但是这显然是不合理的，因为现在的tail已经指向了新的尾节点。
+
+所以如果我们从尾节点开始向前遍历，已经可以遍历到所有的节点。
+
+这也就是为什么我们在AQS相关的源码中，有时候常常会出现==从尾节点开始逆向遍历链表==——因为一个节点要能入队，则它的prev属性一定是有值的，但是它的next属性可能暂时还没有值。
+
+至于那些“分叉”的入队失败的其他节点，在下一轮的循环中，它们的prev属性会重新指向新的尾节点，继续尝试新的CAS操作，最终，所有节点都会通过自旋不断的尝试入队，直到成功为止
+
+### CAS操作
+
+- AQS的3个属性state,head和tail
+- Node对象的2个属性waitStatus,next
+
+### 独占锁加锁流程图
 
 ![](https://youpaiyun.zongqilive.cn/image/AQS1.png)
 
@@ -632,7 +621,7 @@ private final boolean parkAndCheckInterrupt() {
 
 
 
-### 锁释放流程
+### 锁释放流程源码分析
 
 ```java
 // 在成功释放锁之后,唤醒后继节点只是一个"附加操作",无论该操作结果怎样,最后release操作都会返回true
@@ -706,7 +695,7 @@ private void unparkSuccessor(Node node) {
     // 此时从尾节点开始向前找起, 直到找到距离head节点最近的ws<=0的节点
     for (Node t = tail; t != null && t != node; t = t.prev)
       /**
-      为什么从tail向前遍历??? 尾分叉现场
+      为什么从tail向前遍历??? 尾分叉现象
       
       node.prev = pred; //step 1, 设置前驱节点
         if (compareAndSetTail(pred, node)) { // step2, 将当前节点设置成新的尾节点
@@ -732,24 +721,6 @@ private void unparkSuccessor(Node node) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## 共享锁
 
 共享锁，则允许多个线程同时获取锁，并发访问 共享资源，如：ReadWriteLock
@@ -758,11 +729,534 @@ private void unparkSuccessor(Node node) {
 
 ==在共享锁模式下，在获取锁和释放锁结束时，都会唤醒后继节点。==
 
+在共享锁模式下，当一个节点获取到了共享锁，我们在获取成功后就可以唤醒后继节点了，而不需要等到该节点释放锁的时候，这是因为共享锁可以被多个线程同时持有，一个锁获取到了，则后继的节点都可以直接来获取。
+
+因此，**在共享锁模式下，在获取锁和释放锁结束时，都会唤醒后继节点**
+
+### 加锁源码分析
+
+```java
+public final void acquireShared(long arg) {
+  /*
+  如果该值 < 0，则代表当前线程获取共享锁失败
+如果该值 > 0，则代表当前线程获取共享锁成功，并且接下来其他线程尝试获取共享锁的行为很可能成功
+如果该值 = 0，则代表当前线程获取共享锁成功，但是接下来其他线程尝试获取共享锁的行为会失败
+  */
+  if (tryAcquireShared(arg) < 0)
+    doAcquireShared(arg);
+}
+
+
+private void doAcquireShared(long arg) {
+  // 共享的节点
+  final Node node = addWaiter(Node.SHARED);
+  boolean failed = true;
+  try {
+    boolean interrupted = false;
+    for (;;) {
+      final Node p = node.predecessor();
+      if (p == head) {
+        long r = tryAcquireShared(arg);
+        if (r >= 0) { // 获取到锁
+          // 设置head, 里边还调用doReleaseShared,唤醒后继的节点(不必等待锁释放)
+          setHeadAndPropagate(node, r);
+          p.next = null; // help GC
+          if (interrupted)
+            selfInterrupt();
+          failed = false;
+          return;
+        }
+      }
+      if (shouldParkAfterFailedAcquire(p, node) &&
+          parkAndCheckInterrupt())
+        interrupted = true;
+    }
+  } finally {
+    if (failed)
+      cancelAcquire(node);
+  }
+}
+
+private void setHeadAndPropagate(Node node, long propagate) {
+  Node h = head;
+  // 设置head, 变相出队
+  setHead(node);
+  if (propagate > 0 || h == null || h.waitStatus < 0 ||
+      (h = head) == null || h.waitStatus < 0) {
+    Node s = node.next;
+    if (s == null || s.isShared())
+      doReleaseShared();
+  }
+}
+
+```
+
+
+
+### 释放锁源码分析
+
+```java
+public final boolean releaseShared(int arg) {
+  if (tryReleaseShared(arg)) {
+    doReleaseShared();
+    return true;
+  }
+  return false;
+}
+```
+
+### doReleaseShared
+
+方法有两处调用，
+
+一处在`acquireShared`方法的末尾，当线程成功获取到共享锁后，在一定条件下调用该方法；
+
+一处在`releaseShared`方法中，当线程释放共享锁的时候调用。(线程想要获得共享锁，则它们必然**曾经成为过头节点，或者就是现在的头节点**。`releaseShared`方法中调用的`doReleaseShared`，可能此时调用方法的线程已经不是头节点所代表的线程了，头节点可能已经被易主好几次了。)
+
+```java
+private void doReleaseShared() {
+  for (;;) {
+    Node h = head;
+    if (h != null && h != tail) {
+      int ws = h.waitStatus;
+      if (ws == Node.SIGNAL) {
+        if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0)) {
+         continue; 
+        }
+        // 唤醒后继节点 
+        unparkSuccessor(h);
+      }
+      else if (ws == 0 &&
+               !compareAndSetWaitStatus(h, 0, Node.PROPAGATE))
+        continue;                // loop on failed CAS
+    }
+    // 头节点可能已经发生变化, 发生 调用风暴, 
+    // 大量的线程在同时执行doReleaseShared，这极大地加速了唤醒后继节点的速度，提升了效率，
+    // 同时doReleaseShared方法内部的CAS操作又保证了多个线程同时唤醒一个节点时，只有一个线程能操作成功。
+    if (h == head) 
+      break;
+  }
+}
+
+调用风暴是怎么结束的呢？
+1. 自己是头节点可以结束
+2. 发现头节点后面的节点是写锁 ， 这个时候如果直接退出 有可能这个时候读锁已经计数为0了；
+  先判断下这个时候读锁计数是否为0. 如果为0 就唤醒后面的写锁
+  如果这个时候读锁计数不为0 ， 还会不会唤醒写锁？
+  解决这个问题方式：
+  因为写锁不是自己的下一个锁， 不唤醒。 写锁自有他的前一个节点唤醒, 甚至可以不用判断写锁计数， 直接结束。
+```
+
+
+
+# 对象的内存布局
+
+## 对象头
+
+![](https://youpaiyun.zongqilive.cn/image/20200708170053.png)
+
+- ==**对象头**：其主要包括两部分数据：`Mark Word、Class对象指针。==
+  - `Class Point`(类型指针)：是对象指向它的类元数据的指针，虚拟机通过这个指针来确定这个对象是哪个类的实例。
+  - `Mark Word`(标记字段)：这一部分用于储存对象自身的运行时数据，如`哈希码`，`GC`分代年龄，`锁状态标志`，`锁指针`等
+- ==特别地对于数组对象而言，其还包括了数组长度数据。==
+
+### Mark Word
+
+![64位图](https://youpaiyun.zongqilive.cn/image/20200708170208.png)
+
+
+
+## 实例数据
+
+
+
+## 对齐填充
+
+
+
+# synchronized
+
+锁信息存储在对象头的`Mark Word`中, 锁信息是一个指针，它指向一个monitor对象（也称为管程或监视器锁）的起始地址.
+
+![](https://youpaiyun.zongqilive.cn/image/20210620141850.png)
+
+上图所示: 图片的最左边是线程的调用栈，它引用了堆中的一个对象，该对象的对象头部分记录了该对象所使用的监视器锁，该监视器锁指向了一个monitor对象
+
+## monitor对象是什么呢
+
+monitor是由ObjectMonitor实现的，其主要数据结构如下:
+
+```java
+ObjectMonitor() {
+  // 重点关注下边几个字段:
+  _owner        = NULL; // 当前拥有该 ObjectMonitor 的线程
+  _WaitSet      = NULL; // 调用了Object.wait()方法而进入等待状态的线程的集合
+  _EntryList    = NULL ; // 当前等待锁的集合
+
+  _recursions   = 0; // 锁的重入次数
+  _count        = 0; // 用来记录该线程获取锁的次数
+
+
+  _header       = NULL;
+  _waiters      = 0,
+  _object       = NULL;
+  _WaitSetLock  = 0 ;
+  _Responsible  = NULL ;
+  _succ         = NULL ;
+  _cxq          = NULL ;
+  FreeNext      = NULL ;
+  _SpinFreq     = 0 ;
+  _SpinClock    = 0 ;
+  OwnerIsThread = 0 ;
+  _previous_owner_tid = 0;
+}
+```
+
+每一个等待锁的线程都会被封装成ObjectWaiter对象，当多个线程同时访问一段同步代码时，
+
+1. 首先会被扔进 _EntryList 集合中，
+2. 如果其中的某个线程获得了monitor对象，他将成为` _owner`，同时计数器`_count`加1;
+3. 如果在它成为` _owner`之后又调用了`wait`方法，则他将释放获得的monitor对象，`_owner`变量恢复为`null`，`_count`自减1，进入 _WaitSet集合中等待被唤醒。
+
+![](https://youpaiyun.zongqilive.cn/image/20210620142256.png)
+
+<img src="https://youpaiyun.zongqilive.cn/image/20210205154700.png"/>
+
+## 获得锁源码分析
+
+![](https://youpaiyun.zongqilive.cn/image/20210620144226.png)
+
+```java
+void ATTR ObjectMonitor::enter(TRAPS) {
+  Thread * const Self = THREAD ;
+  void * cur ;
+  //通过CAS尝试把monitor的`_owner`字段设置为当前线程
+  cur = Atomic::cmpxchg_ptr (Self, &_owner, NULL) ;
+  //获取锁失败
+  if (cur == NULL) {         assert (_recursions == 0   , "invariant") ;
+                    assert (_owner      == Self, "invariant") ;
+                    // CONSIDER: set or assert OwnerIsThread == 1
+                    return ;
+                   }
+  // 如果旧值和当前线程一样，说明当前线程已经持有锁，此次为重入，_recursions自增，并获得锁。
+  if (cur == Self) { 
+    // TODO-FIXME: check for integer overflow!  BUGID 6557169.
+    _recursions ++ ;
+    return ;
+  }
+
+  // 如果当前线程是第一次进入该monitor，设置_recursions为1，_owner为当前线程
+  if (Self->is_lock_owned ((address)cur)) { 
+    assert (_recursions == 0, "internal state error");
+    _recursions = 1 ;
+    // Commute owner from a thread-specific on-stack BasicLockObject address to
+    // a full-fledged "Thread *".
+    _owner = Self ;
+    OwnerIsThread = 1 ;
+    return ;
+  }
+
+  // 省略部分代码。
+  // 通过自旋执行ObjectMonitor::EnterI方法等待锁的释放
+  for (;;) {
+    jt->set_suspend_equivalent();
+    // cleared by handle_special_suspend_equivalent_condition()
+    // or java_suspend_self()
+
+    EnterI (THREAD) ;
+
+    if (!ExitSuspendEquivalent(jt)) break ;
+
+    _recursions = 0 ;
+    _succ = NULL ;
+    exit (Self) ;
+
+    jt->java_suspend_self();
+  }
+}
+```
+
+
+
+## 释放锁源码
+
+![](https://youpaiyun.zongqilive.cn/image/20210620144626.png)
+
+```java
+void ATTR ObjectMonitor::exit(TRAPS) {
+  Thread * Self = THREAD ;
+  //如果当前线程不是Monitor的所有者
+  if (THREAD != _owner) { 
+    if (THREAD->is_lock_owned((address) _owner)) { // 
+      // Transmute _owner from a BasicLock pointer to a Thread address.
+      // We don't need to hold _mutex for this transition.
+      // Non-null to Non-null is safe as long as all readers can
+      // tolerate either flavor.
+      assert (_recursions == 0, "invariant") ;
+      _owner = THREAD ;
+      _recursions = 0 ;
+      OwnerIsThread = 1 ;
+    } else {
+      // NOTE: we need to handle unbalanced monitor enter/exit
+      // in native code by throwing an exception.
+      // TODO: Throw an IllegalMonitorStateException ?
+      TEVENT (Exit - Throw IMSX) ;
+      assert(false, "Non-balanced monitor enter/exit!");
+      if (false) {
+        THROW(vmSymbols::java_lang_IllegalMonitorStateException());
+      }
+      return;
+    }
+  }
+  // 如果_recursions次数不为0.自减
+  if (_recursions != 0) {
+    _recursions--;        // this is simple recursive enter
+    TEVENT (Inflated exit - recursive) ;
+    return ;
+  }
+
+  //省略部分代码，根据不同的策略（由QMode指定），从cxq或EntryList中获取头节点，通过ObjectMonitor::ExitEpilog方法唤醒该节点封装的线程，唤醒操作最终由unpark完成。
+```
+
+## 小总结
+
+`sychronized`加锁的时候，会调用objectMonitor的`enter`方法，解锁的时候会调用`exit`方法
+
+`sychronized`是可重入锁
+
+# sychronized优化
+
+## 锁消除
+
+```java
+// 就是把不必要的同步在编译阶段进行移除
+// 原理- 逃逸分析
+// 逃逸分析: 就是变量不会外泄
+public Demo {
+  int x;
+  public void locked() {
+  synchronized(new Object) {
+    	x++;
+  	}
+	}
+}
+```
+
+## 适应性自旋锁
+
+所谓自适应就意味着==自旋的次数不再是固定的==，它是由前一次在同一个锁上的自旋时间及锁的拥有者的状态来决定。
+
+## 锁粗化
+
+在一段代码中连续的用同一个监视器锁反复的加锁解锁，甚至加锁操作出现在循环体中的时候，就会导致不必要的性能损耗，这种情况就需要锁粗化。
+
+把同步的区域扩大，尽量避免不必要的加解锁操作。
+
+```java
+​```java
+for(int i=0;i<100000;i++){
+    synchronized(this){
+        do();
+}
+​```
+
+会被粗化成：
+
+​```java
+synchronized(this){
+    for(int i=0;i<100000;i++){
+        do();
+}
+​```
+```
+
+## 锁升级
+
+![](https://youpaiyun.zongqilive.cn/image/20200709192414.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20200710165501.png)
+
+
+
+### 偏向锁
+
+当只有一个线程访问同步代码块
 
 
 
 
 
+### 轻量级锁
+
+JVM会利用CAS尝试把对象原本的Mark Word 更新为Lock Record的指针，成功就说明加锁成功，改变锁标志位为00，然后执行相关同步操作。
+
+
+
+适应的场景是线程交替执行同步块的场合，如果存在同一时间访问同一锁的场合，就会导致轻量级锁就会失效，进而膨胀为重量级锁。
+
+
+
+### 重量级锁
+
+要阻塞或唤醒一个线程就需要操作系统的帮忙，这就要从用户态转换到核心态,切换成本非常高
+
+
+
+### 小总结
+
+![](https://youpaiyun.zongqilive.cn/image/20200712102254.png)
+
+
+
+### 整个升级过程
+
+(1）当没有被当成锁时，这就是一个普通的对象，Mark Word记录对象的HashCode，锁标志位是01，是否偏向锁那一位是0;
+
+(2）当对象被当做同步锁并有一个线程A抢到了锁时，锁标志位还是01，但是否偏向锁那一位改成1，前23bit记录抢到锁的线程id，表示进入偏向锁状态;
+
+(3) 当线程A再次试图来获得锁时，JVM发现同步锁对象的标志位是01，是否偏向锁是1，也就是偏向状态，Mark Word中记录的线程id就是线程A自己的id，表示线程A已经获得了这个偏向锁，可以执行同步中的代码;
+
+(4) 当线程B试图获得这个锁时，JVM发现同步锁处于偏向状态，但是Mark Word中的线程id记录的不是B，那么线程B会先用CAS操作试图获得锁，这里的获得锁操作是有可能成功的，因为线程A一般不会自动释放偏向锁。如果抢锁成功，就把Mark Word里的线程id改为线程B的id，代表线程B获得了这个偏向锁，可以执行同步代码。如果抢锁失败，则继续执行步骤5;
+
+(5) 偏向锁状态抢锁失败，代表当前锁有一定的竞争，偏向锁将升级为轻量级锁。JVM会在当前线程的线程栈中开辟一块单独的空间，里面保存指向对象锁Mark Word的指针，同时在对象锁Mark Word中保存指向这片空间的指针。上述两个保存操作都是CAS操作，如果保存成功，代表线程抢到了同步锁，就把Mark Word中的锁标志位改成00，可以执行同步代码。如果保存失败，表示抢锁失败，竞争太激烈，继续执行步骤6;
+
+(6) 轻量级锁抢锁失败，JVM会使用自旋锁，自旋锁不是一个锁状态，只是代表不断的重试，尝试抢锁。从JDK1.7开始，自旋锁默认启用，自旋次数由JVM决定。如果抢锁成功则执行同步代码，如果失败则继续执行步骤7;
+
+(7) 自旋锁重试之后如果抢锁依然失败，同步锁会升级至重量级锁，锁标志位改为10。在这个状态下，未抢到锁的线程都会被阻塞。
+
+# Condition
+
+一个Lock对象可以创建多个Condition对象，它们是一个对多的关系。
+
+## Condition原理
+
+
+
+
+
+
+
+# Java内存模型
+
+![](https://youpaiyun.zongqilive.cn/image/20200421161724.png)
+
+## as-if-serial语义
+
+不管怎么重排序，单线程的执行结果不会改变。
+
+
+
+## happens-before原则
+
+happens-before关系给编写正确同步的多线程程序的程序员创造了一个幻境：正确同步的多线程程序是按happens-before指定的顺序来执行的。
+
+两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行！
+happens-before仅仅要求前一个操作（执行的结果）对后一个操作可见
+
+### 1-程序的顺序性规则
+
+```java
+这条规则指在一个线程中，按照程序顺序，程序前面对某一个变量的修改一定对后续操作可见的。
+double pi = 3.14; // A
+double r = 1.0; // B
+double area = pi * r * r; // C
+
+比如上面那三行代码，第一行的 "double pi = 3.14; " happens-before 于 “double r = 1.0;”，这就是规则 1 的内容，比较符合单线程里面的逻辑思维，很好理解。
+```
+
+### 2-锁规则
+
+一个锁的`解锁` Happens-Before 于后续对这个锁的`加锁`
+
+这个规则中说的锁其实就是 Java 里的 `synchronized`
+
+### 3-volatile 变量规则
+
+```
+对一个 volatile 域的写，happens-before 于任意后续对这个 volatile 域的读
+
+简单的理解：一个线程修改了volatile变量，则对另外一个线程读取volatile的变量是可见的。
+```
+
+### 4-传递规则
+
+如果 A happens-before B，且 B happens-before C，那么 A happens-before C
+
+```java
+class VolatileExample {
+  int x = 0;
+  volatile boolean v = false;
+  public void writer() {
+    x = 42;
+    v = true;
+  }
+  public void reader() {
+    if (v == true) {
+      // 这里x会是多少呢？
+    }
+  }
+}
+```
+
+两个线程分别执行`writer()`和`reader()`方法，如下图：
+
+![](https://youpaiyun.zongqilive.cn/image/20210306161035.png)
+
+从上图可以知道以下内容：
+
+1. `x=42`对于写变量`v=true`是可见的，符合`程序的顺序性规则`。
+2. 写变量`v=true`对于读变量`v==true`是可见的，符合`volatile变量规则`
+
+结合这个传递性，则`x=42`对于读变量`v==true`是可见的。则如果线程B读到了`v==true`，那么线程A设置的`x=42`对于线程B来说是可见的。
+
+### 5-线程 start() 规则
+
+它是指主线程 A 启动子线程 B 后，子线程 B 能够看到主线程在启动子线程 B 前的操作。
+
+### 6-线程 join() 规则
+
+如果线程 A 执行操作 ThreadB.join()并成功返回，那么线程 B 中的任意操作 happens-before 于线程 A 从 ThreadB.join()操作成功返回。
+
+
+
+# volatitle
+
+>  要注意volatile关键字并不能保证原子性。
+
+## 保证可见性
+
+其实就是禁用 CPU 缓存。
+
+对volatile变量的写操作与普通变量的主要区别有两点：
+
+- 修改volatile变量时会强制将修改后的值刷新的主内存中。
+- 修改volatile变量后会导致其他线程工作内存中对应的变量值失效。因此，再读取该变量值的时候就需要重新从读取主内存中的值。
+
+通过这两个操作，就可以解决volatile变量的可见性问题。
+
+
+
+## 保证有序性
+
+禁止指令重排
+
+volatile 关键字禁止指令重排序有两层意思：
+
+1.  执行volatile读或写操作时，在其前面的操作肯定已经全部执行，且结果已经对后面的操作可见，在volatile后面的操作肯定还没有进行
+
+2. 在进行指令优化时，不能将 volatile 之前的语句放在对 volatile 变量的读写操作之后，也不能把 volatile 变量后面的语句放到其前面执行
+
+happen-before规则
+
+volatile变量规则：对一个 volatile 域的写，happens-before 于任意后续对这个 volatile 域的读
+
+上面是 volatile变量的保证有序性的规则。为了实现volatile内存语义，JMM会对volatile变量限制重排序。
+
+
+
+> 双重锁校验的单利模式
+
+![](https://youpaiyun.zongqilive.cn/image/20210127154837.png)
 
 
 
