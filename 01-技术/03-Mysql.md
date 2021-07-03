@@ -3,11 +3,39 @@ https://mp.weixin.qq.com/mp/homepage?__biz=Mzg3MzU2Njk3MA==&hid=1&sn=5e482808164
 
 https://juejin.cn/post/6973617121347682334?utm_source=gold_browser_extension
 
+
+
+1. Innodb存储基本单位页结构详解
+2. 索引底层原理与执行流程精讲
+3. Mysql是如何选择最优索引的
+4. 覆盖索引底层原理与执行流程精讲
+5. 索引下推底层原理与执行流程精讲
+6. Mysql为什么会出现索引失效 
+7. 亿级流量下Mysql索引优化策略
+8. 一线大厂为什么要基于Mysql开发自研数据库
+[表情]8点直播链接：https://ke.qq.com/webcourse/index.html#cid=230866&term_id=100272363&taid=4409398109898194&from=41
+你不需要很厉害才开始，但是需要开始才能很厉害，今晚8点，让周瑜老师陪你一起开始变得很厉害
 ```
 
 
 
 # Mysql架构
+
+![](https://youpaiyun.zongqilive.cn/image/20210701191759.png)
+
+> **MySQL 8.0 版本直接将查询缓存的整块功能删掉了，**
+
+
+
+InnoDB内存结构包含四大核心组件，分别是：
+
+（1）**缓冲池**(Buffer Pool)；
+
+（2）**写缓冲**(Change Buffer)；
+
+（3）**自适应哈希索引**(Adaptive Hash Index)；
+
+（4）**日志缓冲**(Log Buffer)；
 
 
 
@@ -15,11 +43,19 @@ https://juejin.cn/post/6973617121347682334?utm_source=gold_browser_extension
 
 # 索引结构
 
+https://zhuanlan.zhihu.com/p/281933182
+
+## B树
+
+MongoDB使用B树。
+
+MongoDB读写单个记录的性能（即MongoDB是为了迅速获取对应的键值对信息，所以使用B树可以更好满足需求，如果使用B+树就可能出现回表的情况，性能反而比较差
+
 ## 为什么使用B+树
 
-1. 由于是m分叉的，高度能够大大降低；(B+树中根到每一个节点的路径长度一样，而B树不是这样)
+1. 非叶子节点存储key, 叶子节点存储key和数据
 
-2. 非叶子节点，不存储实际记录，而只存储记录的KEY的话，那么在相同内存的情况下，B+树能够存储更多索引；
+2. 一个结点存储更多的数据 , 能形成的叉数越多,可以减少树高度
 
    **数据预读**的思路是：磁盘读写并不是按需读取，而是按页预读，一次会读一页的数据，每次加载更多的数据，以便未来减少磁盘IO
 
@@ -43,12 +79,18 @@ MyISAM的索引与行记录是分开存储的，叫做**非聚集索引**
 
 # 聚集索引
 
-InnoDB的**主键索引与**行记录是存储在一起的，叫做**聚集索引**
+InnoDB的`主键索引`与行记录是存储在一起的，叫做**聚集索引**
 
 - 主键索引的叶子节点，存储主键，与对应行记录（而不是指针）
-- 普通索引的叶子节点，存储主键（也不是指针）
+- 普通索引的叶子节点，存储主键（也不是指针）-- 非聚集索引
 
 ![](https://youpaiyun.zongqilive.cn/image/20210622202251.png)
+
+聚簇索引一定是主键索引吗?
+
+不一定, 聚集索引不一定是主键，但是主键一定是聚集索引：
+
+原因是如果没有定义主键，聚集索引可能是第一个不允许为 null 的唯一索引，如果也没有这样的唯一索引，InnoDB 会选择内置 6 字节长的 ROWID 作为隐含的聚集索引。
 
 
 
@@ -133,6 +175,16 @@ where
 
 ## explain
 
+### id
+
+
+
+### type
+
+![](https://youpaiyun.zongqilive.cn/image/20210703161532.png)
+
+
+
 ### Extra
 
 - Using Index
@@ -180,20 +232,65 @@ https://juejin.cn/post/6969120307814596645?utm_source=gold_browser_extension
 
 
 
+## 索引下推
+
+
+
+
+
+# sql更新执行流程
+
+![](https://youpaiyun.zongqilive.cn/image/20210123134446.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20200914192953.png)
+
+
+
+
+
+# 日志文件
+
+## redo log
+
+进行数据的新增、删除、修改操作时，会写 **redo log**, 解决数据库宕机重启丢失数据的问题
+
+### 两阶段事务提交
+
+保证数据不丢失
+
+1.  记录一条 redo log 到 redo log buffer 中, redo log 的状态标记为 prepare 状态；
+2. 接着存储引擎告诉执行器，可以提交事务了。执行器接到通知后，会写 binlog 日志，然后提交事务；
+3. 存储引擎接到提交事务的通知后，将 redo log 的日志状态标记为 commit 状态；
+4. 接着根据 innodb_flush_log_at_commit 参数的配置，(默认是1, 事务提交)决定是否将 redo log buffer 中的日志刷入到磁盘。
+
+redo log 在进行数据重做时，只有读到了 commit 标识，才会认为这条 redo log 日志是完整的，才会进行数据重做，否则会认为这个 redo log 日志不完整，不会进行数据重做。
+
+## undo log 
+
+undo log，它是为了实现事务的回滚 和 MVCC
+
+![](https://youpaiyun.zongqilive.cn/image/20210703152616.png)
+
+
+
+## binlog
+
+主从复制 延迟
+
+mult thread slave
 
 # 事务
+
 ## 隔离级别
-### 未提交读(Read Uncommitted)
-允许脏读，也就是可能读取到其他会话中未提交事务修改的数据
-### 提交读(Read Committed)
-只能读取到已经提交的数据
-### 可重复读(Repeated Read)
-mysql默认
-在同一个事务内的查询都是事务开始时刻一致的，InnoDB默认级别。
-在SQL标准中，该隔离级别消除了不可重复读，但是还存在幻象读(mysql解决 GAP锁解决)
-### 串行读(Serializable)
-完全串行化的读，每次读都需要获得表级共享锁，读写相互都会阻塞
-​
+1. 读未提交 read uncommitted
+2. 读已提交 read committed
+3. 可重复读 repeatable read  -- mysql默认
+   1. 该隔离级别消除了不可重复读(MVCC)和幻象读(mysql解决 GAP锁解决)
+4. 可串行化  serializable -- 对于同一行记录，“写”会加“写锁”，“读”会加“读锁”，当出现读写锁冲突的时候，后访问的事务必须等前一个事务执行完成，才能继续执行。
+
+隔离程度 从上到下 , 越来越强
+
+## 问题
 
 
 1. `脏读` -- 当一个事务读取到另一个事务`尚未提交`的修改时, 产生脏读.
@@ -202,33 +299,64 @@ mysql默认
 
 
 
-## RC(读已提交) 与 RR(可重复读) 在锁方面的区别
+## RC与 RR在锁方面的区别
 1. RR 支持 gap lock(next-key lock)，而RC则没有gap lock。   
 因为MySQL的RR需要gap lock来解决幻读问题。而RC隔离级别则是允许存在不可重复读和幻读的。所以RC的并发一般要好于RR
 ​
 
 2. RC 隔离级别，通过 where 条件过滤之后，不符合条件的记录上的行锁，会释放掉(虽然这里破坏了“两阶段加锁原则”)；但是RR隔离级别，即使不符合where条件的记录，也不会释放行锁和gap lock；所以从锁方面来看，RC的并发应该要好于RR
 
-## MVCC
-
-undolog, 版本链, readview
 
 
+
+
+
+
+# MVCC
+
+## 三个概念
+
+`undolog`, ` 版本链`,` readview(在版本链 里选择哪一条记录)`
 
 在RR级别中，通过MVCC机制，虽然让数据变得可重复读
-快照读
+
+MVCC解决的是快照读的幻读问题，并不能解决当前读的幻读问题,当前读的幻读问题是通过间隙锁解决的
 
 - 快照读：就是select
    - select * from table ….;
+   
 - 当前读：特殊的读操作，插入/更新/删除操作，属于当前读，处理的都是当前的数据，需要加锁。
+
+   `强制性的读取最新版本的数据`
+
    - select * from table where ? lock in share mode;
    - select * from table where ? for update;
    - insert;
    - update ;
    - delete;
 
-当前读 
-​
+## ReadView机制
+
+当事务在开始执行的时候，会给每个事务生成一个 ReadView。这个 ReadView 会记录 4 个非常重要的属性：
+
+1. **creator_trx_id**: 当前事务的 id；
+2. `m_ids`: 当前系统中所有的活跃事务的 id列表，活跃事务指的是当前系统中开启了事务，但是还没有commit的事务；
+3. **min_trx_id**: 就是 m_id 数组中最小的事务 id；
+4. **max_trx_id**: 就是 m_id 数组中最大的事务 id 再加 1，也就是系统中下一个要生成的事务 id。
+
+### 判断版本可用
+
+![](https://youpaiyun.zongqilive.cn/image/20210703154034.png)
+
+> 读已提交和RR , 生成readview的时机是不同的, 
+>
+> RC: 每次执行select查询的时候生成 readview, 是以select查询为单位的
+>
+> RR; 是以一个事务为单位, 第一次selected 生成readview, 后边的查询都是用这个readview, 查询的是同一份readview
+>
+> RR下已经生成了 ReadView 数据, 后期不会随着其他事务的提交而变化 
+
+
 
 # 分库分表
 

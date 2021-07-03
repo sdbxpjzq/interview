@@ -1,5 +1,11 @@
 # 重新开始
 
+https://www.bilibili.com/read/cv11271026?from=articleDetail&spm_id_from=333.976.b_726561645265636f6d6d656e64496e666f.4
+
+https://www.bilibili.com/read/cv11269242?from=articleDetail&spm_id_from=333.976.b_726561645265636f6d6d656e64496e666f.4
+
+
+
 https://github.com/guofu-angela/angela-java
 
 死磕java并发--https://www.topjava.cn/article/1391297775492272128
