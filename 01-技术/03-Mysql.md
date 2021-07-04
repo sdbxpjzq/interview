@@ -117,6 +117,21 @@ InnoDB的`主键索引`与行记录是存储在一起的，叫做**聚集索引*
 
 
 # 联合索引的认识
+
+全值匹配我最爱, 最左前缀要遵守;
+
+带头大哥不能死(不能使用范围查询), 中间兄弟不能断;
+
+索引列上少计算, 范围之后(in除外)全失效;
+
+`like`百分写右边, 覆盖索引不写星;
+
+不等空值还有`or`, 索引失效要少用;
+
+变量引号不可丢, `SQL`高级也不难!
+
+
+
 对(a,b)字段建立索引
 ![](https://youpaiyun.zongqilive.cn/image/20210530133613.png)
 如图所示他们是按照a来进行排序，在a相等的情况下，才按b来排序。
@@ -182,7 +197,46 @@ where
 ```
 那么索引建立成(status,type,operator_id,operate_time)就是非常正确的，因为可以覆盖到所有情况。这个就是利用了索引的最左匹配的原则
 
-# 索引下推
+# 回表优化
+
+## 索引下推
+
+`idx_name_title_age (name,title,age)`联合索引,
+
+```sql
+select id, name, sex from index_opt_test where name='cc' and title like '%7' and sex='male';
+```
+
+Server层会将where条件中`在组合索引中的字段全部推送`到引擎层，引擎层根据断桥原则匹配出索引数据，然后将其他索引字段带入再进行一次筛选，然后拿最终匹配的主键关键字回表查询出数据后返回给Server层，Server层再根据剩余的where条件做一次筛选，然后返回给Client
+
+- 执行过程：
+
+- 1. Server把name和title都推到引擎层
+  2. 引擎层根据name去idx_cb中查询出主键关键字和title、age  , ( ==这里加强了过滤, 数据量少了, 回表的也就少了==)
+  3. 再由title筛选出匹配的主键关键字
+  4. 回表去捞数据返回给Server层
+  5. Server层再根据sex筛选出最终的数据
+  6. 再返回给客户端
+
+
+
+
+
+
+
+## MRR 优化
+
+`MRR`的思想就很简单，开启`MRR`之后，`MySQL`会将所有返回的主键先进行排序，然后再进行回表。这样就避免了离散读取的问题。
+
+![](https://youpaiyun.zongqilive.cn/image/20200916135147.png)
+
+
+
+
+
+
+
+
 
 
 
@@ -255,6 +309,16 @@ https://juejin.cn/post/6969120307814596645?utm_source=gold_browser_extension
 
 
 ## optimizer trace
+
+# InnoDB行格式
+
+![](https://youpaiyun.zongqilive.cn/image/20200826100856.png)
+
+### 3个隐藏列
+
+![](https://youpaiyun.zongqilive.cn/image/20200826110844.png)
+
+
 
 
 
@@ -417,7 +481,35 @@ mult thread slave
 
 
 
-# sql更新执行流程
+### 主从复制
+
+![](https://youpaiyun.zongqilive.cn/image/20200916155742.png)
+
+master
+
+（1）**binlog dump线程**：log dump线程通知slave有数据更新，当I/O线程请求日志内容时，会将此时的binlog名称和当前更新的位置同时传给slave的I/O线程。
+
+slave
+
+（2）**I/O线程**：该线程会连接到master，向log dump线程请求一份指定binlog文件位置的副本，并将请求回来的binlog存到本地的relay log中，relay log和binlog日志一样也是记录了数据更新的事件，它也是按照递增后缀名的方式，产生多个relay log（ host_name-relay-bin.000001）文件，slave会使用一个index文件（ host_name-relay-bin.index）来追踪当前正在使用的relay log文件。
+
+（3）**SQL线程**：该线程检测到relay log有更新后，会读取并在本地做redo操作，将发生在主库的事件在本地重新执行一遍，来保证主从数据同步。此外，如果一个relay log文件中的全部事件都执行完毕，那么SQL线程会自动将该relay log 文件删除掉。
+
+
+
+为什么需要relay log?
+
+同步过来的bin log 数据, SQL thread 不一定能及时处理
+
+
+
+### 主从延迟
+
+mult thread slave
+
+
+
+# SQL更新执行流程
 
 ![](https://youpaiyun.zongqilive.cn/image/20210123134446.png)
 
@@ -503,6 +595,108 @@ MVCC解决的是快照读的幻读问题，并不能解决当前读的幻读问�
 > RR; 是以一个事务为单位, 第一次selected 生成readview, 后边的查询都是用这个readview, 查询的是同一份readview
 >
 > RR下已经生成了 ReadView 数据, 后期不会随着其他事务的提交而变化 
+
+
+
+# 锁机制
+
+## 锁类型
+
+按互斥程度来划分: 
+
+- 共享锁(S锁、IS锁)，可以提高读读并发；
+- 排他锁: 为了保证数据强一致，InnoDB使用强互斥锁(X锁、IX锁)，保证同一行记录修改与删除的串行性；
+
+按锁的粒度来划分: 
+
+- 表锁：意向锁(IS锁、IX锁)、自增锁；
+- 行锁：记录锁、间隙锁(Gap Locks)、临键锁(Next-key Locks)、插入意向锁；
+
+其中
+
+1. InnoDB的细粒度锁(即行锁)，是实现在索引记录上的(我的理解是如果未命中索引则会失效)；
+2. 记录锁锁定索引记录；间隙锁锁定间隔，防止间隔中被其他事务插入；临键锁锁定索引记录+间隔，防止幻读；
+3. InnoDB使用插入意向锁，可以提高插入并发；
+4. 间隙锁(gap lock)与临键锁(next-key lock) **只在RR以上的级别生效，RC下会失效** ；
+
+### 表锁
+
+#### 意向锁
+
+InnoDB为了支持多粒度锁机制(multiple granularity locking)，即允许行级锁与表级锁共存，而引入了意向锁
+
+意向锁是指，未来的某个时刻，事务可能要加共享/排它锁了，先提前声明一个意向。
+
+1. 意向锁是一个表级别的锁(table-level locking)；
+
+2. 意向锁又分为：
+
+3. - 意向共享锁，它预示着，事务有意向对表中的某些行加共享S锁；
+   - 意向排它锁，它预示着，事务有意向对表中的某些行加排它X锁；
+
+>  事务要获得某些行的S/X锁，必须先获得表对应的IS/IX锁，意向锁仅仅表明意向
+
+意向锁之间相互兼容，兼容互斥表如下：
+
+![](https://youpaiyun.zongqilive.cn/image/20210704174507.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20210704174530.png)
+
+#### 自增锁
+
+自增锁是一种特殊的表级别锁, 专门针对事务插入AUTO_INCREMENT类型的列
+
+如果一个事务正在往表中插入记录，所有其他事务的插入必须等待，以便第一个事务插入的行，是连续的主键值。
+
+
+
+### 行锁
+
+#### 间隙锁
+
+间隙锁的主要目的，就是为了防止其他事务在间隔中插入数据，以导致“不可重复读”。
+
+如果把事务的隔离级别降级为读提交(Read Committed,RC)，间隙锁则会自动失效。 
+
+#### 临键锁(Next-key Locks)
+
+是记录锁与间隙锁的组合，它的封锁范围，既包含索引记录，又包含索引区间
+
+`默认情况下`，innodb使用next-key locks来锁定记录
+
+>  当查询的索引含有唯一属性的时候，Next-Key Lock会进行优化，将其降级为Record Lock，即仅锁住索引本身，不是范围
+
+```sql
+索引情况: index_num(num) 
+数据情况: 10,20,30
+事务A执行如下语句，未提交：  
+    select * from lock_example where num = 20 for update;  
+
+事务B开始，执行如下语句，会阻塞：
+    insert into lock_example values('zhang',15);
+```
+
+事务A执行查询语句之后，默认给id=20这条记录加上了next-keylock，所以事务B插入[10, 30)之间的记录都会阻塞
+
+> 临键锁的主要目的，也是为了避免幻读(Phantom Read)。如果把事务的隔离级别降级为RC，临键锁则也会失效
+
+#### 插入意向锁
+
+是专门针对`insert`操作的
+
+多个事务，在同一个索引，同一个范围区间插入记录时，如果插入的位置不冲突，不会阻塞彼此。
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
