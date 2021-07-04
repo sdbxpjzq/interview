@@ -94,6 +94,26 @@ InnoDB的`主键索引`与行记录是存储在一起的，叫做**聚集索引*
 
 
 
+# 索引设计原则
+
+### 字段适不适合建索引
+
+`不同值的数目 /  总记录数 `,  越接近 `1`, 这个索引的效率就越高
+
+假设一个表有2000条记录,  索引列 有1980个不同的值, 那么索引的选择性  =  1980 / 2000 = 0.99.
+
+例如有一个国籍字段,  14亿中国人的国籍都是中国, 不需要创建索引.
+
+### 其他原则
+
+- 使用短索引，如果对长字符串列进行索引，应该指定一个前缀长度，这样能够节省大量索引空间
+- 更新频繁字段不适合创建索引
+- 数据区分度不高的列不适合做索引列(如性别), 区分度的公式是count(distinct col)/count(*)
+- 尽量的扩展索引，不要新建索引。比如表中已经有a的索引，现在要加(a,b)的索引，那么只需要修改原来的索引即可。
+- 对于定义为text、image和bit的数据类型的列不要建立索引。
+
+
+
 
 
 # 联合索引的认识
@@ -162,28 +182,40 @@ where
 ```
 那么索引建立成(status,type,operator_id,operate_time)就是非常正确的，因为可以覆盖到所有情况。这个就是利用了索引的最左匹配的原则
 
+# 索引下推
 
 
-# 索引优化
 
-## 索引设计优化原则
+# SQL语句优化
 
-1. 尽量选择区分度高的列作为索引,区分度的公式是count(distinct col)/count(*)
-1. 最左前缀匹配原则
-1. 索引列不能参与计算
-1. 利用覆盖索引
+1. 应尽量避免全表扫描，首先应考虑在 where 及 order by 涉及的列上建立索引。
+2. 应尽量避免在 where 子句中对字段进行 null 值判断，否则将导致引擎放弃使用索引而进行全表扫描
+3. 索引列不能参与计算
+4. 利用索引覆盖
+5. 查询满足最左前缀匹配原则
+6. 分页优化
 
-## explain
+
+
+## explain分析
 
 ### id
 
-
+- id相同执行顺序由上至下。
+- id不同，id值越大优先级越高，越先被执行。
+- id为null时表示一个结果集，不需要使用它查询，常出现在包含union等查询语句中。
 
 ### type
 
+consts 表中最多只有一个匹配行（主键或者唯一索引），在优化阶段即可读取到数据
+
+ref 指的是使用普通的索引（normal index）
+
 ![](https://youpaiyun.zongqilive.cn/image/20210703161532.png)
 
+### key
 
+在查询中实际使用的索引，若没有使用索引，显示为NULL
 
 ### Extra
 
@@ -219,32 +251,122 @@ where
 
 
 
-
-
-https://juejin.cn/post/6973671172810637343?utm_source=gold_browser_extension#heading-5
-
-
-
 https://juejin.cn/post/6969120307814596645?utm_source=gold_browser_extension
 
 
-### optimizer trace
-
-
-
-## 索引下推
+## optimizer trace
 
 
 
 
 
-# sql更新执行流程
+# InnoDB内存结构
 
-![](https://youpaiyun.zongqilive.cn/image/20210123134446.png)
+## 缓冲池(Buffer Pool)
 
-![](https://youpaiyun.zongqilive.cn/image/20200914192953.png)
+以页为单位，缓存最热的数据页(data page)与索引页(index page)
+
+读请求，缓冲池能够减少磁盘IO，提升性能。
+
+![](https://youpaiyun.zongqilive.cn/image/20210704152941.png)
 
 
+
+### free链表
+
+记录bufferPool哪些页是空白的
+
+当把磁盘中的页要加载到buffer pool时, 先来free链表获取一个空白页对应的控制块,数据页放到指定位置后, 则从free链表删除该控制块
+
+![](https://youpaiyun.zongqilive.cn/image/20210704153430.png)
+
+
+
+### flush链表
+
+记录Buffer Pool哪些写页是被修改过的, 由后台线程定时刷到磁盘
+
+
+
+### LRU链表(并非简单的)
+
+将哪些页淘汰, 每次buffer pool添加新的页数据, 将会有新的控制块加入链表
+
+`热数据区域` 和 `冷数据区`(比例: 5:3)
+
+新数据最先加入到冷数据区域, 
+
+什么情况下冷数据转移到热数据呢?
+
+ 同一页 当两次访问的时间间隔 大于1秒, t2 -t1 > 1s, 转移到热数据区域
+
+
+
+
+
+## Double write Buffer
+
+Doubel write保证了页的可靠性
+
+![](https://youpaiyun.zongqilive.cn/image/20210704154823.png)
+
+1. 当一系列机制触发数据缓冲池中的脏页刷新时，并不直接写入磁盘数据文件中，而是先拷贝至内存中的doublewrite buffer中；
+
+2、接着从两次写缓冲区分两次写入磁盘共享表空间中(连续存储，顺序写，性能很高)，每次写1MB；
+
+3、待第二步完成后，再将doublewrite buffer中的脏页数据写入实际的各个表空间文件(离散写)；(脏页数据固化后，即进行标记对应doublewrite数据可覆盖)
+
+
+
+写入共享表空间失败:
+
+MySQL会直接使用redo log的条数据构建一个新页写入到【磁盘数据文件.idb】中，此时的故障恢复不需要doublewrite buffer的参与。
+
+
+
+当写入磁盘（共享表空间）的doublewirte buffer完成，写入【磁盘数据文件.idb】时发生故障:
+
+MySQL进行故障恢复时会使用磁盘（共享表空间）的doublewirte buffer进行恢复，因为此时磁盘（共享表空间）的doublewirte buffer已经写入完成，保存的是完整页，故也可保证的【磁盘数据文件.idb】数据的完整性，
+
+
+
+## 写缓冲(Change Buffer)
+
+主要目的是将对二级索引的数据操作缓存下来，以此减少二级索引的随机IO，并达到操作合并的效果。
+
+种应用在非唯一普通索引页不在缓冲池中，对页进行了写操作，并不会立刻将磁盘页加载到缓冲池，而仅仅记录缓冲变更(buffer changes)，等未来数据被读取时，再将数据合并(merge)恢复到缓冲池中的技术.
+
+![](https://youpaiyun.zongqilive.cn/image/20210704155343.png)
+
+如果在此时，机器断电重启了，会不会导致 change buffer 丢失呢？change buffer 丢失可不是小事情，再从磁盘读出来的话就没有办法进行merge了，相当于数据丢失了？
+
+是不会丢失的。虽然只是更新内存，但是在事务提交的时候，change buffer 的操作也会记录到 redo log 里面，所以崩溃回复的时候，change buffer 也是可以找回来的。
+
+
+
+merge过程是否会把数据直接写回磁盘？
+
+先看下merge流程是什么样子的吧：
+
+ 1、从磁盘读入数据页到内存中（老版本的数据页）
+
+ 2、从change buffer 里找出这个数据页的 change buffer 记录，可能是多个，以此按照顺序进行应用，得到最新的版本数据页。
+
+ 3、写redo log。这个redo log 包含了 数据的变更 和 change buffer 的 变更。
+
+在此时 merge 的操作就结束了。这时候数据页 和 内存中的 change buffer 对应的磁盘位置都还没有进行修改， 属于脏页。之后各自在刷回自己的物理数据，就是另一个过程。
+
+
+
+**在普通索引和唯一索引上该如何进行选择呢？**
+
+尽可能的使用普通索引。两类索引在查询上没有什么差别，只要考虑更新性能的影响。因为普通索引可以很好的使用到 change buffer。
+
+
+
+## 日志缓冲(Log Buffer)
+
+redo log buffer
 
 
 
@@ -261,9 +383,23 @@ https://juejin.cn/post/6969120307814596645?utm_source=gold_browser_extension
 1.  记录一条 redo log 到 redo log buffer 中, redo log 的状态标记为 prepare 状态；
 2. 接着存储引擎告诉执行器，可以提交事务了。执行器接到通知后，会写 binlog 日志，然后提交事务；
 3. 存储引擎接到提交事务的通知后，将 redo log 的日志状态标记为 commit 状态；
-4. 接着根据 innodb_flush_log_at_commit 参数的配置，(默认是1, 事务提交)决定是否将 redo log buffer 中的日志刷入到磁盘。
+4. 接着根据 innodb_flush_log_at_commit 参数的配置，(默认是1, 事务提交时,立即持久化)决定是否将 redo log buffer 中的日志刷入到磁盘。
 
 redo log 在进行数据重做时，只有读到了 commit 标识，才会认为这条 redo log 日志是完整的，才会进行数据重做，否则会认为这个 redo log 日志不完整，不会进行数据重做。
+
+
+
+为什么引入redo log ?直接更新磁盘数据不行吗?
+
+写 redo log 时，我们将 redo log 日志追加到文件末尾，虽然也是一次磁盘 IO，但是这是顺序写操作, 而对于直接将数据更新到磁盘，涉及到的操作是将 buffer pool 中缓存页写入到磁盘上的数据页上，由于涉及到寻找数据页在磁盘的哪个地方，这个操作发生的是随机写操作
+
+从另一方面来讲，通常一次更新操作，我们往往只会涉及到修改几个字节的数据，而如果因为仅仅修改几个字节的数据，就将整个数据页写入到磁盘（无论是磁盘还是 buffer pool，他们管理数据的单位都是以页为单位），这个代价未免也太了（每个数据页默认是 16KB），而一条 redo log 日志的大小可能就只有几个字节，因此每次磁盘 IO 写入的数据量更小，那么耗时也会更短。
+
+
+
+正是由于 Redo Log 的存在，可以让内存中出现大量的脏页。
+
+
 
 ## undo log 
 
@@ -279,7 +415,19 @@ undo log，它是为了实现事务的回滚 和 MVCC
 
 mult thread slave
 
+
+
+# sql更新执行流程
+
+![](https://youpaiyun.zongqilive.cn/image/20210123134446.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20200914192953.png)
+
+
+
 # 事务
+
+![](https://youpaiyun.zongqilive.cn/image/20210704154525.png)
 
 ## 隔离级别
 1. 读未提交 read uncommitted
