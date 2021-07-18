@@ -1,5 +1,17 @@
 # 重新开始
 
+书森学院 143
+https://space.bilibili.com/9099840/channel/detail?cid=152877&ctype=0
+
+算法打卡
+https://space.bilibili.com/9099840/channel/detail?cid=152877&ctype=0
+
+
+
+https://juejin.cn/post/6981790758290358302?utm_source=gold_browser_extension
+
+https://juejin.cn/post/6981993831877050382?utm_source=gold_browser_extension
+
 https://www.bilibili.com/read/cv11271026?from=articleDetail&spm_id_from=333.976.b_726561645265636f6d6d656e64496e666f.4
 
 https://www.bilibili.com/read/cv11269242?from=articleDetail&spm_id_from=333.976.b_726561645265636f6d6d656e64496e666f.4
