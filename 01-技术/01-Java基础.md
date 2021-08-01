@@ -1,4 +1,4 @@
-[TOC]
+
 
 https://www.bilibili.com/video/BV1wf4y1W7Hj
 
@@ -8,19 +8,7 @@ https://blog.csdn.net/weixin_43314519/article/details/112603595?ops_request_misc
 
 
 
-
-
-# JVM
-
-
-
-
-
-
-
-
-
-## 对象创建的6个步骤
+# 对象创建的6个步骤
 
 1. 类是否加载
 2. 为对象分配内存
@@ -32,21 +20,17 @@ https://blog.csdn.net/weixin_43314519/article/details/112603595?ops_request_misc
 
 
 
-# 线程池
+# JVM
 
-## 构造参数
+## JVM组成
 
-ThreadPoolExecutor参数最全的构造方法：
+> 注意方法区的变化, 为什么方法区要做出改变?
+>
+> 移到了本地内存中, 方法区就不受 JVM 的控制了，这个区域也就不会进行 GC，也因此提升了性能，正因为放到了本地内存，也就不存在由于永久代限制大小而导致的 OOM 异常了。
 
-![图片](https://youpaiyun.zongqilive.cn/image/640.png)
+![](https://youpaiyun.zongqilive.cn/image/20210115161657.png)
 
-- **corePoolSize：**线程池的核心线程数，说白了就是，即便是线程池里没有任何任务，也会有corePoolSize个线程在候着等任务。
-- **maximumPoolSize：**最大线程数，不管你提交多少任务，线程池里最多工作线程数就是maximumPoolSize。
-- **keepAliveTime：**线程的存活时间。当线程池里的线程数大于corePoolSize时，如果等了keepAliveTime时长还没有任务可执行，则线程退出。
-- **unit：**这个用来指定keepAliveTime的单位，比如秒:TimeUnit.SECONDS。
-- **workQueue：**一个阻塞队列，提交的任务将会被放到这个队列里。
-- **threadFactory：**线程工厂，用来创建线程，主要是为了给线程起名字，默认工厂的线程名字：pool-1-thread-3。
-- **handler：**拒绝策略，当线程池里线程被耗尽，且队列也满了的时候会调用。
+![](https://youpaiyun.zongqilive.cn/image/20210115161718.png)
 
 
 
@@ -63,6 +47,8 @@ ThreadPoolExecutor参数最全的构造方法：
 ## GC Roots
 
 哪些可以作为GC Roots?
+
+
 
 
 
@@ -223,32 +209,37 @@ e=next ----> e=null
 
 # JUC并发
 
-## 进程与线程的区别
+## 并发和并行
+
+### 并发
+
+> 一个处理器同时处理多个任务(某一时刻只有一个任务在处理)
+
+![](https://youpaiyun.zongqilive.cn/image/20200605150841.png)
+
+
+
+### 并行
+
+![](https://youpaiyun.zongqilive.cn/image/20200605150848.png)
+
+![](https://youpaiyun.zongqilive.cn/image/20200605150855.png)
+
+
+
+## 进程与线程
 
 区别
 
 1. 进程是资源分配最小单位，线程是程序执行的最小单位；
 2. 进程有自己独立的地址空间，每启动一个进程，系统都会为其分配地址空间，建立数据表来维护代码段、堆栈段和数据段，线程没有独立的地址空间，它使用相同的地址空间共享数据；
 3. CPU切换一个线程比切换进程花费小；
-4. 创建一个线程比进程开销小；
-5. 线程占用的资源要⽐进程少很多。
 6. 线程之间通信更方便，同一个进程下，线程共享全局变量，静态变量等数据，进程之间的通信需要以通信的方式（IPC）进行；（但多线程程序处理好同步与互斥是个难点）
-7. 多进程程序更安全，生命力更强，一个进程死掉不会对另一个进程造成影响（源于有独立的地址空间），多线程程序更不易维护，一个线程死掉，整个进程就死掉了（因为共享地址空间）；
-8. 进程对资源保护要求高，开销大，效率相对较低，线程资源保护要求不高，但开销小，效率高，可频繁切换；
+7. 多进程程序更安全，生命力更强，一个进程死掉不会对另一个进程造成影响（源于有独立的地址空间），多线程程序更不易维护，一个线程死掉，整个进程就死掉了（因为共享地址空间）
 
+## Java默认有几个线程
 
-
-**加强理解，做个简单的比喻：进程=火车，线程=车厢**
-
-- 线程在进程下行进（单纯的车厢无法运行）
-- 一个进程可以包含多个线程（一辆火车可以有多个车厢）
-- 不同进程间数据很难共享（一辆火车上的乘客很难换到另外一辆火车，比如站点换乘）
-- 同一进程下不同线程间数据很易共享（A车厢换到B车厢很容易）
-- 进程要比线程消耗更多的计算机资源（采用多列火车相比多个车厢更耗资源）
-- 进程间不会相互影响，一个线程挂掉将导致整个进程挂掉（一列火车不会影响到另外一列火车，但是如果一列火车上中间的一节车厢着火了，将影响到所有车厢）
-- 进程可以拓展到多机，进程最多适合多核（不同火车可以开在多个轨道上，同一火车的车厢不能在行进的不同的轨道上）
-- 进程使用的内存地址可以上锁，即一个线程使用某些共享内存时，其他线程必须等它结束，才能使用这一块内存。（比如火车上的洗手间）－"互斥锁"
-- 进程使用的内存地址可以限定使用量（比如火车上的餐厅，最多只允许多少人进入，如果满了需要在门口等，等有人出来了才能进去）－“信号量”
+2 个,   mian和GC
 
 ## 创建线程的方式
 
@@ -276,7 +267,7 @@ e=next ----> e=null
 
 **死亡( dead )：**线程 run ()、 main () 方法执行结束，或者因异常退出了 run ()方法，则该线程结束生命周期。死亡的线程不可再次复生。
 
-
+![](https://youpaiyun.zongqilive.cn/image/20210127094440.png)
 
 
 
@@ -293,6 +284,12 @@ e=next ----> e=null
 非公平锁则允许在线程发出请求后立即尝试获取锁，如果可用则可直接获取锁，尝试失败才进行排队等待。
 
 
+
+
+
+# JUC组成
+
+![](https://youpaiyun.zongqilive.cn/image/20210306174450.png)
 
 
 
@@ -489,6 +486,8 @@ private Node enq(final Node node) {
   }
 }
 ```
+
+
 
 
 
@@ -849,6 +848,48 @@ private void doReleaseShared() {
 
 
 
+# 线程池
+
+## 构造参数
+
+ThreadPoolExecutor参数最全的构造方法：
+
+![图片](https://youpaiyun.zongqilive.cn/image/640.png)
+
+- **corePoolSize：**线程池的核心线程数，说白了就是，即便是线程池里没有任何任务，也会有corePoolSize个线程在候着等任务。
+- **maximumPoolSize：**最大线程数，不管你提交多少任务，线程池里最多工作线程数就是maximumPoolSize。
+- **keepAliveTime：**非核心线程的存活时间。当线程池里的线程数大于corePoolSize时，如果等了keepAliveTime时长还没有任务可执行，则线程退出。
+- **unit：**这个用来指定keepAliveTime的单位，比如秒:TimeUnit.SECONDS。
+- **workQueue：**一个阻塞队列，提交的任务将会被放到这个队列里。
+- **threadFactory：**线程工厂，用来创建线程，主要是为了给线程起名字，默认工厂的线程名字：pool-1-thread-3。
+- **handler：**拒绝策略，当线程池里线程被耗尽，且队列也满了的时候会调用。
+
+![](https://youpaiyun.zongqilive.cn/image/20210124145917.png)
+
+## 线程回收利用CAS方式
+
+```java
+// Are workers subject to culling?
+boolean timed = allowCoreThreadTimeOut || wc > corePoolSize;
+if ((wc > maximumPoolSize || (timed && timedOut))
+    && (wc > 1 || workQueue.isEmpty())) {
+    if (compareAndDecrementWorkerCount(c))
+        return null;
+    continue;
+}
+
+// cas的方式 worker数量减一，返回null，之后会进行Worker回收工作
+private boolean compareAndDecrementWorkerCount(int expect) {
+    return ctl.compareAndSet(expect, expect - 1);
+}
+```
+
+
+
+## 线程数的设定
+
+
+
 # 对象的内存布局
 
 ## 对象头
@@ -1053,7 +1094,7 @@ public Demo {
 把同步的区域扩大，尽量避免不必要的加解锁操作。
 
 ```java
-​```java
+```java
 for(int i=0;i<100000;i++){
     synchronized(this){
         do();

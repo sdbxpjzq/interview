@@ -48,7 +48,9 @@ redis main函数执行流程
 - 每个元素的长度小于64字节
 #### 跳表 (跳表原理)
 
-时间复杂度平均能达到`O(log n)`
+时间复杂度平均能达到`O(log n)`, 和二分查找一样
+
+思想:空间换时间
 
 ##### 跳表时间复杂度计算
 
@@ -234,11 +236,11 @@ LFU 表示按最近的访问频率进行淘汰，它比 LRU 更加精准地表�
 消费消息队列的消息，获取要删除的key
 重试删除缓存操作
 ```
-![image.png](https://cdn.nlark.com/yuque/0/2021/png/1011530/1621567375329-469c197f-613f-4e5f-b773-b4aef1ebc74b.png#clientId=ua026df69-fc46-4&from=paste&height=598&id=uac502d5f&margin=%5Bobject%20Object%5D&name=image.png&originHeight=598&originWidth=1084&originalType=binary&size=106525&status=done&style=none&taskId=uffc6bbff-91dc-4cdc-9aaa-22affbeb257&width=1084)
+![](https://youpaiyun.zongqilive.cn/image/20210725140108.png)
 ## 订阅数据库的 binlog
 重试删除缓存机制还可以，就是会造成好多业务代码入侵。其实，还可以通过数据库的binlog来异步淘汰key。
-![image.png](https://cdn.nlark.com/yuque/0/2021/png/1011530/1621567572311-8baf38a2-0e92-4a9b-a18a-19fe70149d72.png#clientId=ua026df69-fc46-4&from=paste&height=618&id=uc227eb16&margin=%5Bobject%20Object%5D&name=image.png&originHeight=618&originWidth=1009&originalType=binary&size=108270&status=done&style=none&taskId=u02f6ef25-a185-495a-acf3-1aa7cfa795d&width=1009)
-​
+![](https://youpaiyun.zongqilive.cn/image/20210725140131.png)
+
 
 # 数据持久化
 ## 快照同步(RDB)

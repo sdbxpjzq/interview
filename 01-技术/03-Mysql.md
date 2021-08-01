@@ -27,6 +27,8 @@ https://juejin.cn/post/6973617121347682334?utm_source=gold_browser_extension
 
 
 
+![](https://youpaiyun.zongqilive.cn/image/20210723094313.png)
+
 
 
 # 索引结构
@@ -63,7 +65,7 @@ MyISAM的索引与行记录是分开存储的，叫做**非聚集索引**
 - 主键索引的叶子节点，存储主键，与对应行记录的指针
 - 普通索引的叶子结点，存储索引列，与对应行记录的指针
 
-![](https://youpaiyun.zongqilive.cn/image/20210622200928.png)'
+![](https://youpaiyun.zongqilive.cn/image/20210622200928.png)
 
 # 聚集索引
 
@@ -106,19 +108,14 @@ InnoDB的`主键索引`与行记录是存储在一起的，叫做**聚集索引*
 
 # 联合索引的认识
 
+```
 全值匹配我最爱, 最左前缀要遵守;
-
 带头大哥不能死(不能使用范围查询), 中间兄弟不能断;
-
 索引列上少计算, 范围之后(in除外)全失效;
-
-`like`百分写右边, 覆盖索引不写星;
-
-不等空值还有`or`, 索引失效要少用;
-
-变量引号不可丢, `SQL`高级也不难!
-
-
+like百分写右边, 覆盖索引不写星;
+不等空值还有or, 索引失效要少用;
+变量引号不可丢, SQL高级也不难!
+```
 
 对(a,b)字段建立索引
 ![](https://youpaiyun.zongqilive.cn/image/20210530133613.png)
@@ -148,6 +145,7 @@ SELECT * FROMtableWHERE a > 1and b = 2;
 SELECT * FROM`table`WHERE a > 1and b = 2and c > 3; 
 如何建立索引?
 此题回答也是不一定，(b,a)或者(b,c)都可以，要结合具体情况具体分析。
+
 ##### 题目4
 SELECT * FROM `table` WHERE a = 1 ORDER BY b; 
 如何建立索引？
@@ -217,16 +215,6 @@ Server层会将where条件中`在组合索引中的字段全部推送`到引擎�
 `MRR`的思想就很简单，开启`MRR`之后，`MySQL`会将所有返回的主键先进行排序，然后再进行回表。这样就避免了离散读取的问题。
 
 ![](https://youpaiyun.zongqilive.cn/image/20200916135147.png)
-
-
-
-
-
-
-
-
-
-
 
 # SQL语句优化
 
@@ -396,7 +384,7 @@ MySQL进行故障恢复时会使用磁盘（共享表空间）的doublewirte buf
 
 主要目的是将对二级索引的数据操作缓存下来，以此减少二级索引的随机IO，并达到操作合并的效果。
 
-种应用在非唯一普通索引页不在缓冲池中，对页进行了写操作，并不会立刻将磁盘页加载到缓冲池，而仅仅记录缓冲变更(buffer changes)，等未来数据被读取时，再将数据合并(merge)恢复到缓冲池中的技术.
+这种应用在非唯一普通索引页不在缓冲池中，对页进行了写操作，并不会立刻将磁盘页加载到缓冲池，而仅仅记录缓冲变更(buffer changes)，等未来数据被读取时，再将数据合并(merge)恢复到缓冲池中的技术.
 
 ![](https://youpaiyun.zongqilive.cn/image/20210704155343.png)
 
@@ -517,8 +505,6 @@ mult thread slave
 
 # 事务
 
-![](https://youpaiyun.zongqilive.cn/image/20210704154525.png)
-
 ## 隔离级别
 1. 读未提交 read uncommitted
 2. 读已提交 read committed
@@ -538,9 +524,10 @@ mult thread slave
 
 
 ## RC与 RR在锁方面的区别
-1. RR 支持 gap lock(next-key lock)，而RC则没有gap lock。   
-因为MySQL的RR需要gap lock来解决幻读问题。而RC隔离级别则是允许存在不可重复读和幻读的。所以RC的并发一般要好于RR
-​
+1. RR 支持 gap lock(next-key lock)，而RC则没有gap lock。 
+
+  因为MySQL的RR需要gap lock来解决幻读问题。而RC隔离级别则是允许存在不可重复读和幻读的。所以RC的并发一般要好于RR
+  ​
 
 2. RC 隔离级别，通过 where 条件过滤之后，不符合条件的记录上的行锁，会释放掉(虽然这里破坏了“两阶段加锁原则”)；但是RR隔离级别，即使不符合where条件的记录，也不会释放行锁和gap lock；所以从锁方面来看，RC的并发应该要好于RR
 
@@ -673,8 +660,8 @@ InnoDB为了支持多粒度锁机制(multiple granularity locking)，即允许�
 
 ##### 加锁场景
 
-1. 唯一(主键/唯一)索引进行范围查询，会加 大于查询范围前开后闭最小范围的临键锁, ( ]
-2. 通过非唯一键查询，会锁定对应索引记录及其之前的间隙
+1. 进行范围查询，会加 大于查询范围前开后闭最小范围的临键锁, ( ]
+2. 通过非唯一键等值查询，会锁定对应索引记录及其之前的间隙
 3. 如果没有建立索引，那么在查询过程中实际上扫描的是全表，所以最终会锁全表
 
 
@@ -893,13 +880,10 @@ UUID的适用场景可以为不担心过多的空间占用，以及不需要生�
 ```
 
 
-![](https://uploader.shimo.im/f/IHdMBu2uVwPzI7h9.png!thumbnail?fileGuid=tRP98DKjtKhRRW3W#id=NG17a&originalType=binary&status=done&style=none)
-
-
 ### 雪花算法
 
 
-### 时钟回拨问题
+#### 时钟回拨问题
 
 
 ```
